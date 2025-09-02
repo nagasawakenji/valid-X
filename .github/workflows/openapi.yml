@@ -1,0 +1,16 @@
+name: OpenAPI CI
+on:
+  pull_request:
+    paths: ["openapi/**.yml"]
+  push:
+    branches: [main]
+    paths: ["openapi/**.yml"]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate OpenAPI spec
+        run: |
+          npm install -g swagger-cli
+          swagger-cli validate openapi/valid-X.v1.yml
