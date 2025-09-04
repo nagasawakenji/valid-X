@@ -737,42 +737,6 @@ components:
       example:
         content: "Hello World!"
 
-    Tweet:
-      type: object
-      required: [tweet_id, user_id, content, created_at]
-      properties:
-        tweet_id:
-          type: string
-        user_id:
-          type: string
-        content:
-          type: string
-          maxLength: 280
-        created_at:
-          type: string
-          format: date-time
-        metrics:
-          type: object
-          properties:
-            like_count:
-              type: integer
-              format: int32
-            repost_count:
-              type: integer
-              format: int32
-            reply_count:
-              type: integer
-              format: int32
-      example:
-        tweet_id: "01J9J3M5Y3M8QX9PABCD123AAA"
-        user_id: "01J9J3M5Y3M8QX9PABCD123AAA"
-        content: "初投稿!"
-        created_at: "2025-09-01T12:40:00Z"
-        metrics:
-          like_count: 0
-          repost_count: 0
-          reply_count: 0
-
     PageTweet:
       type: object
       properties:

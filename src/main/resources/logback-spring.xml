@@ -1,0 +1,22 @@
+<configuration>
+    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp/>
+                <pattern>
+                    <!-- レベル、スレッド -->
+                    <pattern>{"level":"%level","thread":"%thread"}</pattern>
+                </pattern>
+                <loggerName/>
+                <message/>
+                <mdc/> <!-- Micrometer Tracing が MDC に traceId/spanId を入れる -->
+                <arguments/>
+                <stackTrace/>
+            </providers>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="JSON"/>
+    </root>
+</configuration>
