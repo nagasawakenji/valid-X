@@ -1,0 +1,3 @@
+ALTER TABLE users
+  ADD COLUMN locale   VARCHAR(10),
+  ADD COLUMN timezone VARCHAR(50);
