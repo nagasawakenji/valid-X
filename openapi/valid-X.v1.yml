@@ -264,7 +264,7 @@ paths:
         "201":
           description: Created
           headers:
-            Locations:
+            Location:
               description: URL of the created tweet
               required: true
               schema:
@@ -448,7 +448,7 @@ components:
   securitySchemes:
     bearerAuth:
       type: http
-      schema: bearer
+      scheme: bearer
       bearerFormat: JWT
   parameters:
     CursorParam:

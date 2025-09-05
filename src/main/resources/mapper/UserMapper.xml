@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Nagasawa.valid_X.mapper.UserMapper">
+
+    <!--select句-->
+    <select id="findById" parameterType="Long" resultType="Nagasawa.valid_X.model.User">
+        SELECT
+            u.id,
+            u.username,
+            u.display_name,
+            u.created_at
+        FROM users u
+        WHERE u.id = #{id}
+    </select>
+
+    <select id="findByUsername" parameterType="String" resultType="Nagasawa.valid_X.model.User">
+        SELECT
+            u.id,
+            u.username,
+            u.display_name,
+            u.created_at
+        FROM users u
+        WHERE u.username = #{username}
+    </select>
+
+    <select id="findFollowers" parameterType="Long" resultType="Nagasawa.valid_X.model.User">
+        SELECT
+            u.id,
+            u.username,
+            u.display_name,
+            u.created_at
+        FROM users u
+        JOIN follows f
+        ON f.follower_id = u.id
+        WHERE f.followee_id = #{userId}
+        ORDER BY f.created_at DESC
+    </select>
+
+    <select id="findFollowees" parameterType="Long" resultType="Nagasawa.valid_X.model.User">
+        SELECT
+            u.id,
+            u.username,
+            u.display_name,
+            u.created_at
+        FROM users u
+        JOIN follows f
+        ON f.follower_id = u.id
+        WHERE f.follower_id = #{userId}
+        ORDER BY f.created_at DESC
+    </select>
+
+    <!--insert句-->
+    <insert id="insertUser" parameterType="Nagasawa.valid_X.model.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (username, display_name, created_at)
+        VALUES (#{username}, #{displayName}, #{createdAt})
+    </insert>
+
+    <!--update句-->
+    <update id="updateUser" parameterType="Nagasawa.valid_X.model.User">
+        UPDATE users
+        SET
+            username = #{username},
+            display_name = #{displayName}
+        WHERE id = #{id}
+    </update>
+
+    <!--delete句-->
+    <delete id="deleteUser" parameterType="Nagasawa.valid_X.model.User">
+        DELETE FROM users
+        WHERE id = #{id}
+    </delete>
+
+</mapper>
