@@ -19,8 +19,62 @@ paths:
             schema:
               $ref: "#/components/schemas/RegisterForm"
       responses:
+        "202":
+          description: Verification email sent (no resource created yet)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Verification email has been sent."
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "409":
+          description: Username or email already taken (already registered)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "422":
+          description: Validation failed
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "429":
+          description: Too Many Requests (verification re-send throttled)
+          headers:
+            Retry-After:
+              description: Seconds to wait before the next attempt
+              schema:
+                type: integer
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "500":
+          description: Internal server error
+
+  /v1/auth/verify:
+    post:
+      tags: [Auth]
+      operationId: auth_verify
+      summary: Verify a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyEmailToken"
+      responses:
         "201":
-          description: Created a new user
+          description: CREATED
           headers:
             Location:
               description: "作成されたユーザーのリソースURL"
@@ -38,8 +92,14 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/Problem"
-        "409":
-          description: Conflict
+        "404":
+          description: Token not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "410":
+          description: Token expired
           content:
             application/problem+json:
               schema:
@@ -50,6 +110,60 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/Problem"
+        "500":
+          description: Internal server error
+
+  /v1/auth/verify/resend:
+    post:
+      tags: [Auth]
+      operationId: auth_verify_resend
+      summary: Resend verification email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResendVerificationRequest"
+      responses:
+        "202":
+          description: Verification email sent (if eligible). Response is identical even if no pending signup exists.
+          headers:
+            Retry-After:
+              description: Seconds until another resend is allowed (present when throttled hint is needed)
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "If an account is pending verification, a new email has been sent."
+                  resend_after_seconds:
+                    type: integer
+                    example: 60
+        "400":
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "422":
+          description: Validation failed
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "429":
+          description: Too Many Requests (verification re-send throttled)
+          headers:
+            Retry-After:
+              description: Seconds to wait before the next attempt
+              schema: { type: integer }
+            content:
+              application/problem+json:
+                schema: { $ref: "#/components/schemas/Problem" }
         "500":
           description: Internal server error
 
@@ -669,6 +783,31 @@ components:
           format: date-time
           description: Expiration time in UTC
           example: "2025-09-01T13:34:56Z"
+    VerifyEmailToken:
+      type: object
+      required: [email, token]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        token:
+          type: string
+          pattern: "^[0-9]{6}$"
+
+    ResendVerificationRequest:
+      type: object
+      oneOf:
+        - required: [ email ]
+        - required: [ username_or_email ]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        username_or_email:
+          type: string
+          maxLength: 254
 
     User:
       type: object

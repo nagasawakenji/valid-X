@@ -1,10 +1,9 @@
 -- フォロワーの対応を表す
 CREATE TABLE follows (
-  follower_id BIGINT NOT NULL REFERENCES user(id) ON DELETE CASCADE,
-  followee_id BIGINT NOT NULL REFERENCES user(id) ON DELETE CASCADE,
+  follower_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  followee_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   PRIMARY KEY (follower_id, followee_id),
-  -- follower_idとfollowee_idが一致しないようにする
   CONSTRAINT chk_follow_self CHECK (follower_id <> followee_id)
 );
 
