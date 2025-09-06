@@ -11,5 +11,7 @@ public class User {
     private Long id;
     private String username;
     private String displayName;
+    private String locale;
     private LocalDateTime createdAt;
+    private String timezone;
 }
