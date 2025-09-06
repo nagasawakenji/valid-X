@@ -10,8 +10,6 @@ CREATE TABLE pending_users (
   email          CITEXT NOT NULL UNIQUE,
   password_hash  TEXT NOT NULL,
   token_hash     BYTEA NOT NULL,
-  attempt_count  INTEGER NOT NULL DEFAULT 0,
-  locked_until   TIMESTAMPTZ,
   expires_at     TIMESTAMPTZ NOT NULL,
   verified       BOOLEAN NOT NULL DEFAULT FALSE,
   resend_count   INTEGER NOT NULL DEFAULT 0,

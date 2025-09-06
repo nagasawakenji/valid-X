@@ -71,7 +71,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/VerifyEmailToken"
+              $ref: "#/components/schemas/VerifyLinkToken"
       responses:
         "201":
           description: CREATED
@@ -783,17 +783,15 @@ components:
           format: date-time
           description: Expiration time in UTC
           example: "2025-09-01T13:34:56Z"
-    VerifyEmailToken:
+    VerifyLinkToken:
       type: object
-      required: [email, token]
+      required: [token]
       properties:
-        email:
-          type: string
-          format: email
-          maxLength: 254
         token:
           type: string
-          pattern: "^[0-9]{6}$"
+          minLength: 16
+          maxLength: 512
+          example: "R3p7dD1W95XkW8rmV2L1mQ"
 
     ResendVerificationRequest:
       type: object

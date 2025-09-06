@@ -8,7 +8,9 @@
             u.id,
             u.username,
             u.display_name,
-            u.created_at
+            u.created_at,
+            u.locale,
+            u.timezone
         FROM users u
         WHERE u.id = #{id}
     </select>
@@ -18,7 +20,9 @@
             u.id,
             u.username,
             u.display_name,
-            u.created_at
+            u.created_at,
+            u.locale,
+            u.timezone
         FROM users u
         WHERE u.username = #{username}
     </select>
@@ -41,7 +45,9 @@
             u.id,
             u.username,
             u.display_name,
-            u.created_at
+            u.created_at,
+            u.locale,
+            u.timezone
         FROM users u
         JOIN follows f
         ON f.follower_id = u.id

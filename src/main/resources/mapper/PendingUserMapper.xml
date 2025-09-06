@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Nagasawa.valid_X.mapper.PendingUserMapper">
+
+    <!--select句-->
+    <select id="findPendingUserById" parameterType="Long" resultType="Nagasawa.valid_X.model.PendingUser">
+        SELECT
+            p.id,
+            p.username,
+            p.display_name,
+            p.email,
+            p.password_hash,
+            p.token_hash,
+            p.expires_at,
+            p.verified,
+            p.resend_count,
+            p.last_sent_at,
+            p.locale,
+            p.timezone,
+            p.created_at,
+            p.updated_at
+        FROM pending_users p
+        WHERE p.id = #{id}
+    </select>
+
+    <!--insert句-->
+    <insert id="insertPendingUser" parameterType="PendingUser" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO pending_users (username, display_name, email, password_hash, token_hash, attempt_count, locked_until, expires_at, verified, resend_count, last_sent_at, locale, timezone, created_at, updated_at)
+        VALUES (#{username}, #{displayName}, #{email}, #{passwordHash}, #{tokenHash}, #{attemptCount}, #{lockedUntil}, #{expiresAt}, #{verified}, #{resendCount}, #{lastSentAt}, #{locale}, #{timezone}, #{createdAt}, #{updatedAt})
+        ON CONFLICT (email) DO UPDATE SET
+            username = EXCLUDED.username,
+            display_name = EXCLUDED.display_name,
+            password_hash = EXCLUDED.password_hash,
+            token_hash = EXCLUDED.token_hash,
+            expires_at = EXCLUDED.expires_at,
+            verified = EXCLUDED.verified,
+            resend_count = EXCLUDED.resend_count,
+            last_sent_at = EXCLUDED.last_sent_at,
+            locale = EXCLUDED.locale,
+            timezone = EXCLUDED.timezone,
+            created_at = EXCLUDED.created_at,
+            updated_at = EXCLUDED.updated_at
+    </insert>
+
+    <update id="updatePendingUser" parameterType="PendingUser">
+        UPDATE pending_users
+        SET
+            username = #{username},
+            display_name = #{displayName},
+            email = #{email},
+            password_hash = #{passwordHash},
+            token_hash = #{tokenHash},
+            expires_at = #{expiresAt},
+            verified = #{verified},
+            resend_count = #{resendCount},
+            last_sent_at = #{lastSentAt},
+            locale = #{locale},
+            timezone = #{timezone},
+            created_at = #{createdAt},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deletePendingUser" parameterType="Long">
+        DELETE FROM pending_users WHERE id = #{id}
+    </delete>
+
+    <delete id="deletePendingUsers" parameterType="Boolean">
+        DELETE FROM pending_users WHERE verified = #{verified}
+    </delete>
+
+</mapper>
