@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="Nagasawa.valid_X.mapper.PendingUserMapper">
+<mapper namespace="Nagasawa.valid_X.infra.mybatis.mapper.PendingUserMapper">
 
     <!--select句-->
-    <select id="findPendingUserById" parameterType="Long" resultType="Nagasawa.valid_X.model.PendingUser">
+    <select id="findPendingUserById" parameterType="Long" resultType="Nagasawa.valid_X.domain.model.PendingUser">
         SELECT
             p.id,
             p.username,
@@ -17,14 +17,38 @@
             p.last_sent_at,
             p.locale,
             p.timezone,
+            p.attempt_count,
+            p.locked_until,
             p.created_at,
             p.updated_at
         FROM pending_users p
         WHERE p.id = #{id}
     </select>
 
+    <select id="findPendingUserByTokenHash" parameterType="String" resultType="Nagasawa.valid_X.domain.model.PendingUser">
+        SELECT
+            p.id,
+            p.username,
+            p.display_name,
+            p.email,
+            p.password_hash,
+            p.token_hash,
+            p.expires_at,
+            p.verified,
+            p.resend_count,
+            p.last_sent_at,
+            p.locale,
+            p.timezone,
+            p.attempt_count,
+            p.locked_until,
+            p.created_at,
+            p.updated_at
+        FROM pending_users p
+        WHERE p.token_hash = #{tokenHash}
+    </select>
+
     <!--insert句-->
-    <insert id="insertPendingUser" parameterType="PendingUser" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertPendingUser" parameterType="Nagasawa.valid_X.domain.model.PendingUser" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO pending_users (username, display_name, email, password_hash, token_hash, attempt_count, locked_until, expires_at, verified, resend_count, last_sent_at, locale, timezone, created_at, updated_at)
         VALUES (#{username}, #{displayName}, #{email}, #{passwordHash}, #{tokenHash}, #{attemptCount}, #{lockedUntil}, #{expiresAt}, #{verified}, #{resendCount}, #{lastSentAt}, #{locale}, #{timezone}, #{createdAt}, #{updatedAt})
         ON CONFLICT (email) DO UPDATE SET
@@ -38,11 +62,10 @@
             last_sent_at = EXCLUDED.last_sent_at,
             locale = EXCLUDED.locale,
             timezone = EXCLUDED.timezone,
-            created_at = EXCLUDED.created_at,
             updated_at = EXCLUDED.updated_at
     </insert>
 
-    <update id="updatePendingUser" parameterType="PendingUser">
+    <update id="updatePendingUser" parameterType="Nagasawa.valid_X.domain.model.PendingUser">
         UPDATE pending_users
         SET
             username = #{username},
@@ -56,12 +79,11 @@
             last_sent_at = #{lastSentAt},
             locale = #{locale},
             timezone = #{timezone},
-            created_at = #{createdAt},
             updated_at = #{updatedAt}
         WHERE id = #{id}
     </update>
 
-    <delete id="deletePendingUser" parameterType="Long">
+    <delete id="deletePendingUserById" parameterType="Long">
         DELETE FROM pending_users WHERE id = #{id}
     </delete>
 
