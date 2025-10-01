@@ -3,6 +3,7 @@ package Nagasawa.valid_X.domain.model;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -18,6 +19,6 @@ public class Media {
     private byte sha256;
     private String blurhash;
     private String storageKey;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
 }

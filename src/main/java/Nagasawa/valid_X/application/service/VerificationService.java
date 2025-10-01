@@ -1,6 +1,7 @@
 package Nagasawa.valid_X.application.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -15,6 +16,7 @@ import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class VerificationService {
     // 認証に用いるハッシュトークンなどに関するロジックを取りまとめる
 
@@ -26,15 +28,19 @@ public class VerificationService {
         // これは128bitのbit配列
         byte[] bytes = new byte[16];
         secureRandom.nextBytes(bytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+        String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+        // ローカルでcurlを叩くため、一時的にlogに出す
+        // 後で必ず消すこと!!!!!!!!
+        log.info("[DEV] verification token = {}", token);
+        return token;
     }
 
     // pending_usersに登録するハッシュトークンの生成
-    public String hashToken(String urlToken) {
+    public byte[] hashToken(String urlToken) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] hashed = md.digest(urlToken.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(hashed);
+            return hashed;
         } catch (Exception e) {
             throw new RuntimeException("Failed to hash token", e);
         }

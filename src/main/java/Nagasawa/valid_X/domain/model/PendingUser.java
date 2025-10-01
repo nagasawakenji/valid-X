@@ -16,7 +16,9 @@ public class PendingUser {
     private String displayName;
     private String email;
     private String passwordHash;
-    private String tokenHash;
+    private byte[] tokenHash;
+    private Integer attemptCount;
+    private Instant lockedUntil;
     private Instant expiresAt;
     private boolean verified;
     private int resendCount;

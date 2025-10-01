@@ -15,6 +15,13 @@
         WHERE u.id = #{id}
     </select>
 
+    <select id="findByEmail" parameterType="String" resultType="Long">
+        SELECT
+            user_id
+        FROM user_emails
+        WHERE email = #{email}
+    </select>
+
     <select id="findByUsername" parameterType="String" resultType="Nagasawa.valid_X.domain.model.User">
         SELECT
             u.id,

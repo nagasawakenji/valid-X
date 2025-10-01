@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="Nagasawa.valid_X.infra.mybatis.mapper.MagicLinkMapper">
+
+    <!-- マジックリンク挿入 -->
+    <insert id="insert" parameterType="Nagasawa.valid_X.domain.model.MagicLink"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO magic_links (
+        user_id,
+        token_hash,
+        hmac_key_id,
+        expires_at,
+        used_at
+        ) VALUES (
+        #{userId},
+        #{tokenHash,jdbcType=BINARY},
+        #{hmacKeyId},
+        #{expiresAt},
+        #{usedAt}
+        )
+    </insert>
+
+    <!-- ワンタイムトークンを消費し、userId を返す -->
+    <select id="consumeAndReturnUserId" resultType="long">
+        UPDATE magic_links
+        SET used_at = now()
+        WHERE token_hash = #{tokenHash,jdbcType=BINARY}
+        AND hmac_key_id = #{kid}
+        AND used_at IS NULL
+        AND expires_at > now()
+        RETURNING user_id
+    </select>
+
+</mapper>

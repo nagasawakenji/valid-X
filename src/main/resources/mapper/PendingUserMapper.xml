@@ -2,8 +2,28 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="Nagasawa.valid_X.infra.mybatis.mapper.PendingUserMapper">
 
+    <!--PostgreSQLはデフォルトでBYTEAを使うので、mapで変換を明示する-->
+    <resultMap id="PendingUserMap" type="Nagasawa.valid_X.domain.model.PendingUser">
+        <id     property="id"           column="id"            jdbcType="BIGINT"/>
+        <result property="username"     column="username"      jdbcType="VARCHAR"/>
+        <result property="displayName"  column="display_name"  jdbcType="VARCHAR"/>
+        <result property="email"        column="email"         jdbcType="OTHER"/>
+        <result property="passwordHash" column="password_hash" jdbcType="VARCHAR"/>
+        <result property="tokenHash"    column="token_hash"    jdbcType="BINARY"   javaType="_byte[]"/>
+        <result property="expiresAt"    column="expires_at"    jdbcType="TIMESTAMP"/>
+        <result property="verified"     column="verified"      jdbcType="BOOLEAN"/>
+        <result property="resendCount"  column="resend_count"  jdbcType="INTEGER"/>
+        <result property="lastSentAt"   column="last_sent_at"  jdbcType="TIMESTAMP"/>
+        <result property="locale"       column="locale"        jdbcType="VARCHAR"/>
+        <result property="timezone"     column="timezone"      jdbcType="VARCHAR"/>
+        <result property="attemptCount" column="attempt_count" jdbcType="INTEGER"/>
+        <result property="lockedUntil"  column="locked_until"  jdbcType="TIMESTAMP"/>
+        <result property="createdAt"    column="created_at"    jdbcType="TIMESTAMP"/>
+        <result property="updatedAt"    column="updated_at"    jdbcType="TIMESTAMP"/>
+    </resultMap>
+
     <!--select句-->
-    <select id="findPendingUserById" parameterType="Long" resultType="Nagasawa.valid_X.domain.model.PendingUser">
+    <select id="findPendingUserById" parameterType="long" resultMap="PendingUserMap">
         SELECT
             p.id,
             p.username,
@@ -25,7 +45,7 @@
         WHERE p.id = #{id}
     </select>
 
-    <select id="findPendingUserByTokenHash" parameterType="String" resultType="Nagasawa.valid_X.domain.model.PendingUser">
+    <select id="findPendingUserByTokenHash" parameterType="byte[]" resultMap="PendingUserMap">
         SELECT
             p.id,
             p.username,
@@ -44,13 +64,13 @@
             p.created_at,
             p.updated_at
         FROM pending_users p
-        WHERE p.token_hash = #{tokenHash}
+        WHERE p.token_hash = #{tokenHash, jdbcType=BINARY, javaType=_byte[]}
     </select>
 
     <!--insert句-->
     <insert id="insertPendingUser" parameterType="Nagasawa.valid_X.domain.model.PendingUser" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO pending_users (username, display_name, email, password_hash, token_hash, attempt_count, locked_until, expires_at, verified, resend_count, last_sent_at, locale, timezone, created_at, updated_at)
-        VALUES (#{username}, #{displayName}, #{email}, #{passwordHash}, #{tokenHash}, #{attemptCount}, #{lockedUntil}, #{expiresAt}, #{verified}, #{resendCount}, #{lastSentAt}, #{locale}, #{timezone}, #{createdAt}, #{updatedAt})
+        INSERT INTO pending_users (username, display_name, email, password_hash, token_hash, expires_at, verified, resend_count, last_sent_at, locale, timezone)
+        VALUES (#{username}, #{displayName}, #{email}, #{passwordHash}, #{tokenHash, jdbcType=BINARY, javaType=_byte[]}, #{expiresAt}, #{verified}, #{resendCount}, #{lastSentAt}, #{locale}, #{timezone})
         ON CONFLICT (email) DO UPDATE SET
             username = EXCLUDED.username,
             display_name = EXCLUDED.display_name,
@@ -62,7 +82,7 @@
             last_sent_at = EXCLUDED.last_sent_at,
             locale = EXCLUDED.locale,
             timezone = EXCLUDED.timezone,
-            updated_at = EXCLUDED.updated_at
+            updated_at = now()
     </insert>
 
     <update id="updatePendingUser" parameterType="Nagasawa.valid_X.domain.model.PendingUser">
@@ -79,7 +99,7 @@
             last_sent_at = #{lastSentAt},
             locale = #{locale},
             timezone = #{timezone},
-            updated_at = #{updatedAt}
+            updated_at = now()
         WHERE id = #{id}
     </update>
 

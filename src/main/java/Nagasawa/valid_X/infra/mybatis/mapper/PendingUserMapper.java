@@ -10,7 +10,7 @@ public interface PendingUserMapper {
     PendingUser findPendingUserById(Long id);
 
     // tokenHashで1件取得
-    PendingUser findPendingUserByTokenHash(String tokenHash);
+    PendingUser findPendingUserByTokenHash(byte[] tokenHash);
 
     // 仮登録ユーザーの挿入
     int insertPendingUser(PendingUser pendingUser);

@@ -17,6 +17,9 @@ public interface UserMapper {
     // usernameで1件取得
     User findByUsername(String username);
 
+    // emailでuserIdを1件取得
+    Long findByEmail(String email);
+
     // followerを全件取得
     List<User> findFollowers(Long userId);
 

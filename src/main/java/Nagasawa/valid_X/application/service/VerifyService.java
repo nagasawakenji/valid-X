@@ -3,7 +3,7 @@ package Nagasawa.valid_X.application.service;
 import Nagasawa.valid_X.application.mapper.PendingUserConverter;
 import Nagasawa.valid_X.domain.dto.VerifyResult;
 import Nagasawa.valid_X.domain.model.*;
-import Nagasawa.valid_X.event.GenerateAuthTokenRequestEvent;
+import Nagasawa.valid_X.event.MagicLoginLinkRequestedEvent;
 import Nagasawa.valid_X.exception.goneProblems.TokenExpiredException;
 import Nagasawa.valid_X.exception.notFoundProblems.TokenNotFoundProblemException;
 import Nagasawa.valid_X.infra.mybatis.mapper.PendingUserMapper;
@@ -40,7 +40,7 @@ public class VerifyService {
     public VerifyResult verify(String urlToken) {
 
         // urlTokenをハッシュ化（DBのtoken_hashと比較用）
-        String tokenHash = verificationService.hashToken(urlToken);
+        byte[] tokenHash = verificationService.hashToken(urlToken);
 
         // token_hashで pending_users を検索（MyBatis は未ヒット時に null を返すことが多いので Optional でラップ）
         PendingUser pendingUser = java.util.Optional
@@ -113,7 +113,7 @@ public class VerifyService {
         }
 
         // INSERT完了のイベント通知
-        applicationEventPublisher.publishEvent(new GenerateAuthTokenRequestEvent(userId, now));
+        applicationEventPublisher.publishEvent(new MagicLoginLinkRequestedEvent(userId, pendingUser.getEmail(), now));
 
         return VerifyResult.loginMailEnqueued();
     }

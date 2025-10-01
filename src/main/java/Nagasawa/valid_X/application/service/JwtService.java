@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +26,8 @@ public class JwtService {
     @Value("${app.jwt.issuer}") String issuer;
     @Value("${app.jwt.access-ttl}") Duration accessTtl;
 
-    public String issueAccessToken(Long userId, String username, @Nullable Collection<String> roles) {
+    public String issueAccessToken(Long userId, String username,
+                                   UUID sessionId, int sessionVersion, @Nullable Collection<String> roles) {
         Instant now = Instant.now(clock);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -33,6 +35,8 @@ public class JwtService {
                 .issuedAt(now)
                 .expiresAt(now.plus(accessTtl))
                 .subject(String.valueOf(userId))
+                .claim("sid", sessionId.toString())
+                .claim("sv", sessionVersion)
                 .claim("username", username)
                 .claim("roles", roles == null ? List.of() : roles)
                 .build();

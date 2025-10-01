@@ -3,12 +3,12 @@ package Nagasawa.valid_X.domain.model;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Getter
 @Setter
 public class Follow {
     private Long followerId;
     private Long followeeId;
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 }

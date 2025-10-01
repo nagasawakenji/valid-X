@@ -1,13 +1,14 @@
+// SignupService.java
 package Nagasawa.valid_X.application.service;
 
 import Nagasawa.valid_X.domain.dto.RegisterForm;
+import Nagasawa.valid_X.domain.dto.SignupResult;
+import Nagasawa.valid_X.domain.dto.SignupStatus;
 import Nagasawa.valid_X.event.VerificationMailRequestedEvent;
 import Nagasawa.valid_X.infra.mybatis.mapper.PendingUserMapper;
 import Nagasawa.valid_X.domain.model.PendingUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,43 +20,48 @@ import java.time.Instant;
 @Service
 @RequiredArgsConstructor
 public class SignupService {
-    // サインアップに関するロジックをまとめている
     private final VerificationService verificationService;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final ApplicationEventPublisher publisher;
     private final PasswordEncoder passwordEncoder;
     private final Clock clock;
     private final PendingUserMapper pendingUserMapper;
 
     @Transactional
-    public ResponseEntity<Void> signup(RegisterForm registerForm) {
+    public SignupResult signup(RegisterForm form) {
         Instant now = Instant.now(clock);
-        String normalizedEmail = registerForm.getEmail().trim().toLowerCase();
+        String normalizedEmail = form.getEmail().trim().toLowerCase();
 
-        // URLトークンの生成
+        // 既存チェックなど（必要なら）
+        // if (pendingUserMapper.existsActiveByEmail(normalizedEmail)) {
+        //     return new SignupResult(SignupStatus.DUPLICATE, normalizedEmail, null, null, null);
+        // }
+
         String urlToken = verificationService.generateVerificationUrlToken();
-        String tokenHash = verificationService.hashToken(urlToken);
+        byte[] tokenHash = verificationService.hashToken(urlToken);
 
-        // pendingUserを作成する
-        PendingUser pendingUser = PendingUser.builder()
-                .username(registerForm.getUsername())
-                .displayName(registerForm.getDisplayName())
+        PendingUser pending = PendingUser.builder()
+                .username(form.getUsername())
+                .displayName(form.getDisplayName())
                 .email(normalizedEmail)
-                .passwordHash(passwordEncoder.encode(registerForm.getPassword()))
+                .passwordHash(passwordEncoder.encode(form.getPassword()))
                 .tokenHash(tokenHash)
                 .expiresAt(now.plus(Duration.ofMinutes(15)))
                 .resendCount(0)
                 .lastSentAt(now)
-                .locale(registerForm.getLocale())
-                .timezone(registerForm.getTimezone())
+                .locale(form.getLocale())
+                .timezone(form.getTimezone())
                 .build();
 
-        // pending_usersへのinsert
-        pendingUserMapper.insertPendingUser(pendingUser);
+        pendingUserMapper.insertPendingUser(pending); // pending.id を採番
 
-        // insert完了のイベント通知
-        applicationEventPublisher.publishEvent(new VerificationMailRequestedEvent(normalizedEmail, urlToken));
+        // メール送信はイベントへ（AFTER_COMMIT でリスナが送信）
+        publisher.publishEvent(new VerificationMailRequestedEvent(normalizedEmail, urlToken));
 
-        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+        return new SignupResult(
+                SignupStatus.ACCEPTED,
+                normalizedEmail,
+                pending.getExpiresAt(),
+                pending.getResendCount()
+        );
     }
-
 }
