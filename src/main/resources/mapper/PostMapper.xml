@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="Nagasawa.valid_X.infra.mybatis.mapper.PostMapper">
+
+    <insert id="insertTweet" parameterType="Nagasawa.valid_X.domain.model.Tweet" useGeneratedKeys="true" keyProperty="tweetId">
+        INSERT INTO tweets (user_id, content, in_reply_to_tweet_id)
+        VALUES (#{userId}, #{content}, #{inReplyToTweetId})
+    </insert>
+
+    <insert id="insertTweetMedia" parameterType="Nagasawa.valid_X.domain.model.TweetMedia">
+        INSERT INTO tweet_media (tweet_id, media_id, position)
+        VALUES (#{tweetId}, #{mediaId}, #{position})
+    </insert>
+
+    <insert id="insertMedia" parameterType="Nagasawa.valid_X.domain.model.Media" useGeneratedKeys="true" keyProperty="mediaId">
+        INSERT INTO media (media_type, mime_type, bytes, width, height, duration_ms, sha256, blurhash, storage_key)
+        VALUES (#{mediaType}, #{mimeType}, #{bytes}, #{width}, #{height}, #{durationMs}, #{sha256}, #{blurhash}, #{storageKey})
+    </insert>
+
+</mapper>

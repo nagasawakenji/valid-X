@@ -16,7 +16,7 @@ public class Media {
     private int width;
     private int height;
     private int durationMs;
-    private byte sha256;
+    private byte[] sha256;
     private String blurhash;
     private String storageKey;
     private Instant createdAt;

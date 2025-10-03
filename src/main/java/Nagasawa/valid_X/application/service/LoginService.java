@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -74,7 +75,7 @@ public class LoginService {
                 user.getUsername(),
                 session.getId(),
                 session.getSessionVersion(),
-                null
+                List.of("USER")
         );
         long accessTtlSec = Duration.ofMinutes(accessTtlMinutes).toSeconds();
 
