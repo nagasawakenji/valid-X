@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Nagasawa.valid_X.infra.mybatis.mapper.LikeMapper">
+
+    <insert id="insert">
+        INSERT INTO likes (user_id, tweet_id)
+        VALUES (#{userId}, #{tweetId})
+        ON CONFLICT DO NOTHING
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM likes WHERE user_id = #{userId} AND tweet_id = #{tweetId}
+    </delete>
+
+    <select id="exists" resultType="boolean">
+        SELECT EXISTS(
+        SELECT 1 FROM likes WHERE user_id = #{userId} AND tweet_id = #{tweetId}
+        )
+    </select>
+</mapper>

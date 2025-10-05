@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Nagasawa.valid_X.infra.mybatis.mapper.TweetMetricsMapper">
+
+    <!-- カラム→プロパティ -->
+    <resultMap id="TweetMetricsResultMap" type="Nagasawa.valid_X.domain.model.TweetMetrics">
+        <id     property="tweetId"     column="tweet_id"/>
+        <result property="likeCount"   column="like_count"/>
+        <result property="repostCount" column="repost_count"/>
+        <result property="replyCount"  column="reply_count"/>
+    </resultMap>
+
+    <!-- 初期行作成：ツイート作成直後に呼ぶ想定 -->
+    <insert id="insertInit" parameterType="long">
+        INSERT INTO tweet_metrics (tweet_id) VALUES (#{tweetId})
+        ON CONFLICT (tweet_id) DO NOTHING
+    </insert>
+
+    <!-- 取得 -->
+    <select id="findByTweetId" parameterType="long"
+            resultMap="TweetMetricsResultMap">
+        SELECT tweet_id, like_count, repost_count, reply_count
+        FROM tweet_metrics
+        WHERE tweet_id = #{tweetId}
+    </select>
+
+    <select id="getLikeCount" parameterType="long" resultType="int">
+        SELECT like_count
+        FROM tweet_metrics
+        WHERE tweet_id = #{tweetId}
+    </select>
+
+    <select id="getRepostCount" parameterType="long" resultType="int">
+        SELECT repost_count
+        FROM tweet_metrics
+        WHERE tweet_id = #{tweetId}
+    </select>
+
+    <!-- like +1 / -1 -->
+    <update id="incrementLike" parameterType="long">
+        UPDATE tweet_metrics
+        SET like_count = like_count + 1
+        WHERE tweet_id = #{tweetId}
+    </update>
+
+    <update id="decrementLike" parameterType="long">
+        UPDATE tweet_metrics
+        SET like_count = GREATEST(like_count - 1, 0)
+        WHERE tweet_id = #{tweetId}
+    </update>
+
+    <!-- repost +1 / -1 -->
+    <update id="incrementRepost" parameterType="long">
+        UPDATE tweet_metrics
+        SET repost_count = repost_count + 1
+        WHERE tweet_id = #{tweetId}
+    </update>
+
+    <update id="decrementRepost" parameterType="long">
+        UPDATE tweet_metrics
+        SET repost_count = GREATEST(repost_count - 1, 0)
+        WHERE tweet_id = #{tweetId}
+    </update>
+
+    <!-- reply +1（返信作成時に呼ぶ想定） -->
+    <update id="incrementReply" parameterType="long">
+        UPDATE tweet_metrics
+        SET reply_count = reply_count + 1
+        WHERE tweet_id = #{tweetId}
+    </update>
+
+    <!-- 必要なら reply -1 も -->
+    <update id="decrementReply" parameterType="long">
+        UPDATE tweet_metrics
+        SET reply_count = GREATEST(reply_count - 1, 0)
+        WHERE tweet_id = #{tweetId}
+    </update>
+
+</mapper>

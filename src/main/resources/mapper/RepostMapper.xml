@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Nagasawa.valid_X.infra.mybatis.mapper.RepostMapper">
+
+    <!-- 作成（再投稿）: 追加されたら 1、既に存在なら 0 -->
+    <insert id="insertRepost" parameterType="map">
+        INSERT INTO reposts (user_id, tweet_id)
+        VALUES (#{userId}, #{tweetId})
+        ON CONFLICT (user_id, tweet_id) DO NOTHING
+    </insert>
+
+    <!-- 取消（アンリポスト）: 削除できたら 1、存在しなければ 0 -->
+    <delete id="deleteRepost" parameterType="map">
+        DELETE FROM reposts
+        WHERE user_id = #{userId}
+        AND tweet_id = #{tweetId}
+    </delete>
+
+    <!-- 既にリポスト済みか確認（必要なら） -->
+    <select id="exists" parameterType="map" resultType="boolean">
+        SELECT EXISTS(
+        SELECT 1 FROM reposts
+        WHERE user_id = #{userId}
+        AND tweet_id = #{tweetId}
+        )
+    </select>
+
+    <!-- 任意：ユーザ別件数やツイート別件数が必要なら -->
+    <select id="countByTweetId" parameterType="long" resultType="int">
+        SELECT COUNT(*) FROM reposts WHERE tweet_id = #{tweetId}
+    </select>
+
+    <select id="countByUserId" parameterType="long" resultType="int">
+        SELECT COUNT(*) FROM reposts WHERE user_id = #{userId}
+    </select>
+
+</mapper>

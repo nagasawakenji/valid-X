@@ -8,6 +8,7 @@ import Nagasawa.valid_X.domain.model.Tweet;
 import Nagasawa.valid_X.domain.model.TweetMedia;
 import Nagasawa.valid_X.domain.validation.TweetValidator;
 import Nagasawa.valid_X.infra.mybatis.mapper.PostMapper;
+import Nagasawa.valid_X.infra.mybatis.mapper.ReplyMapper;
 import Nagasawa.valid_X.infra.mybatis.mapper.TweetMetricsMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,19 +19,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
-public class PostService {
+@Slf4j
+public class ReplyService {
 
+    private final ReplyMapper replyMapper;
     private final PostMapper postMapper;
     private final TweetValidator tweetValidator;
     private final TweetConverter tweetConverter;
     private final TweetMetricsMapper tweetMetricsMapper;
 
     @Transactional
-    public PostResult post(Long userId, PostForm postForm) {
+    public PostResult reply(Long parentTweetId, Long userId, PostForm postForm) {
+
+        if (!replyMapper.parentExists(parentTweetId)) {
+            throw new IllegalArgumentException("parent tweet not found: id=" + parentTweetId);
+        }
 
         Tweet tweet = tweetConverter.toTweet(postForm, userId);
+        // postFormのinReplyToTweetを上書きする
+        tweet.setInReplyToTweetId(parentTweetId);
         List<Media> medias = tweetConverter.toMedias(postForm);
 
         tweetValidator.validateContent(tweet.getContent());
@@ -55,6 +63,9 @@ public class PostService {
         for (TweetMedia tm: links) {
             postMapper.insertTweetMedia(tm);
         }
+
+        // 親ポストの返信数を+1する
+        tweetMetricsMapper.incrementReply(parentTweetId);
 
         PostResult postResult = tweetConverter.toPostResult(tweet, medias);
 

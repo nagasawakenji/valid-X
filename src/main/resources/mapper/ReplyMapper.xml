@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Nagasawa.valid_X.infra.mybatis.mapper.ReplyMapper">
+
+    <select id="parentExists" resultType="boolean">
+        SELECT EXISTS(SELECT 1 FROM tweets WHERE tweet_id = #{tweetId})
+    </select>
+
+    <select id="findTweet" resultType="Nagasawa.valid_X.domain.model.Tweet">
+        SELECT tweet_id AS tweetId,
+        user_id AS userId,
+        content,
+        in_reply_to_tweet_id AS inReplyToTweetId,
+        created_at AS createdAt
+        FROM tweets
+        WHERE tweet_id = #{tweetId}
+    </select>
+
+    <select id="listReplies" resultType="Nagasawa.valid_X.domain.model.Tweet">
+        SELECT tweet_id AS tweetId,
+        user_id AS userId,
+        content,
+        in_reply_to_tweet_id AS inReplyToTweetId,
+        created_at AS createdAt
+        FROM tweets
+        WHERE in_reply_to_tweet_id = #{parentTweetId}
+        ORDER BY created_at ASC, tweet_id ASC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countReplies" resultType="long">
+        SELECT COUNT(*) FROM tweets WHERE in_reply_to_tweet_id = #{parentTweetId}
+    </select>
+
+</mapper>
