@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Nagasawa.valid_X.infra.mybatis.mapper.DeleteMapper">
+
+    <delete id="deleteTweetById" parameterType="long">
+        DELETE FROM tweets
+        WHERE id = #{tweetId}
+    </delete>
+
+    <delete id="deleteTweetMetricsById" parameterType="long">
+        DELETE FROM tweet_metrics
+        WHERE tweet_id = #{tweetId}
+    </delete>
+
+    <delete id="deleteLikeById" parameterType="long">
+        DELETE FROM likes
+        WHERE tweet_id = #{tweetId}
+    </delete>
+
+    <delete id="deleteRepostById" parameterType="long">
+        DELETE FROM reposts
+        WHERE tweet_id = #{tweetId}
+    </delete>
+
+
+</mapper>

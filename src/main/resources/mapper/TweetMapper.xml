@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Nagasawa.valid_X.infra.mybatis.mapper.TweetMapper">
+
+    <select id="selectTweetById" parameterType="long" resultType="Nagasawa.valid_X.domain.model.Tweet">
+        SELECT
+          tweet_id,
+          user_id,
+          content,
+          in_reply_to_tweet_id,
+          created_at
+        FROM tweets
+        WHERE tweet_id = #{tweetId}
+    </select>
+
+</mapper>
