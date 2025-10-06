@@ -2,6 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="Nagasawa.valid_X.infra.mybatis.mapper.UserMapper">
 
+    <resultMap id="UserSummaryMap" type="Nagasawa.valid_X.domain.dto.UserSummary">
+        <result column="id"           property="id"/>
+        <result column="username"     property="username"/>
+        <result column="display_name" property="displayDisplayName"/> <!-- NG: タイポ防止のため注意 -->
+    </resultMap>
+
     <!--select句-->
     <select id="findById" parameterType="Long" resultType="Nagasawa.valid_X.domain.model.User">
         SELECT
@@ -13,6 +19,27 @@
             u.timezone
         FROM users u
         WHERE u.id = #{id}
+    </select>
+
+    <select id="findSummariesByIds" resultType="Nagasawa.valid_X.domain.dto.UserSummary">
+        SELECT
+        u.id,
+        u.username,
+        u.display_name   AS displayName,
+        u.locale,
+        u.timezone,
+        FROM users u
+        WHERE u.id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY array_position(
+        ARRAY
+        <foreach collection="ids" item="id" open="[" separator="," close="]">
+            #{id}::bigint
+        </foreach>
+        , u.id
+        )
     </select>
 
     <select id="findByEmail" parameterType="String" resultType="Long">

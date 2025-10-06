@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Nagasawa.valid_X.infra.mybatis.mapper.TimelineMapper">
+
+    <!-- 共通列 -->
+    <sql id="tweetViewColumns">
+        t.tweet_id       AS tweetId,
+        t.user_id        AS userId,
+        u.username       AS username,
+        t.content        AS content,
+        t.in_reply_to_tweet_id AS inReplyToTweetId,
+        t.created_at     AS createdAt,
+        COALESCE(tm.like_count,   0) AS likeCount,
+        COALESCE(tm.repost_count, 0) AS repostCount,
+        COALESCE(tm.reply_count,  0) AS replyCount
+        <!-- likedByMe / repostedByMe は必要になったら付与（下に例） -->
+    </sql>
+
+    <!-- ホームTL -->
+    <select id="listHomeTimeline" resultType="Nagasawa.valid_X.domain.dto.TweetView">
+        SELECT
+        <include refid="tweetViewColumns"/>
+        , EXISTS (
+          SELECT 1 FROM likes l
+          WHERE l.user_id = #{viewerId}
+            AND l.tweet_id = t.tweet_id
+        ) AS likedByMe,
+        EXISTS (
+          SELECT 1 FROM reposts r
+          WHERE r.user_id = #{viewerId}
+            AND r.tweet_id = t.tweet_id
+        ) AS repostedByMe
+        FROM tweets t
+        JOIN users u ON u.id = t.user_id
+        LEFT JOIN tweet_metrics tm ON tm.tweet_id = t.tweet_id
+        WHERE
+          (
+            t.user_id = #{viewerId}
+            OR EXISTS (
+              SELECT 1
+              FROM follows f
+              WHERE f.follower_id = #{viewerId}
+                AND f.followee_id = t.user_id
+          )
+        )
+        <if test="cursor != null">
+            AND t.tweet_id &lt; #{cursor}
+        </if>
+        ORDER BY t.tweet_id DESC
+        LIMIT #{limit} + 1
+    </select>
+
+    <!-- リプライ一覧 -->
+    <select id="listReplies" resultType="Nagasawa.valid_X.domain.dto.TweetView">
+        SELECT
+        <include refid="tweetViewColumns"/>
+        ,  EXISTS (
+        SELECT 1 FROM likes l
+        WHERE l.user_id = #{viewerId}
+        AND l.tweet_id = t.tweet_id
+        ) AS likedByMe,
+        EXISTS (
+        SELECT 1 FROM reposts r
+        WHERE r.user_id = #{viewerId}
+        AND r.tweet_id = t.tweet_id
+        ) AS repostedByMe
+        FROM tweets t
+        JOIN users u ON u.id = t.user_id
+        LEFT JOIN tweet_metrics tm ON tm.tweet_id = t.tweet_id
+        WHERE t.in_reply_to_tweet_id = #{parentTweetId}
+        <if test="cursor != null">
+            AND t.tweet_id &lt; #{cursor}
+        </if>
+        ORDER BY t.tweet_id DESC
+        LIMIT #{limit} + 1
+    </select>
+
+    <!-- ユーザー別タイムライン -->
+    <select id="listUserTweets" resultType="Nagasawa.valid_X.domain.dto.TweetView">
+        SELECT
+        <include refid="tweetViewColumns"/>
+        ,  EXISTS (
+        SELECT 1 FROM likes l
+        WHERE l.user_id = #{viewerId}
+        AND l.tweet_id = t.tweet_id
+        ) AS likedByMe,
+        EXISTS (
+        SELECT 1 FROM reposts r
+        WHERE r.user_id = #{viewerId}
+        AND r.tweet_id = t.tweet_id
+        ) AS repostedByMe
+        FROM tweets t
+        JOIN users u ON u.id = t.user_id
+        LEFT JOIN tweet_metrics tm ON tm.tweet_id = t.tweet_id
+        WHERE t.user_id = #{targetUserId}
+        <if test="cursor != null">
+            AND t.tweet_id &lt; #{cursor}
+        </if>
+        ORDER BY t.tweet_id DESC
+        LIMIT #{limit} + 1
+    </select>
+
+</mapper>

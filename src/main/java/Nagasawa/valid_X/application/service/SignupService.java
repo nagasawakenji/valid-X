@@ -8,6 +8,7 @@ import Nagasawa.valid_X.event.VerificationMailRequestedEvent;
 import Nagasawa.valid_X.infra.mybatis.mapper.PendingUserMapper;
 import Nagasawa.valid_X.domain.model.PendingUser;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SignupService {
     private final VerificationService verificationService;
     private final ApplicationEventPublisher publisher;
@@ -38,6 +40,10 @@ public class SignupService {
 
         String urlToken = verificationService.generateVerificationUrlToken();
         byte[] tokenHash = verificationService.hashToken(urlToken);
+
+        // 検証用
+        // 後で必ず消す!!
+        log.info("[DEV] url token (base64url) = {}", urlToken);
 
         PendingUser pending = PendingUser.builder()
                 .username(form.getUsername())

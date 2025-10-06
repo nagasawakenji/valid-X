@@ -31,28 +31,27 @@
         SELECT COUNT(*) FROM follows WHERE follower_id = #{userId}
     </select>
 
-    <!-- 自分をフォローしているユーザID一覧（新しい順、cursorId で keyset paging） -->
+    <!-- 自分をフォローしているユーザID一覧（新しい順、cursorId は created_at のエポックms） -->
     <select id="listFollowers" resultType="long">
         SELECT follower_id
         FROM follows
         WHERE followee_id = #{userId}
         <if test="cursorId != null">
-            AND id &lt; #{cursorId}
+            AND created_at &lt; to_timestamp(#{cursorId} / 1000.0)
         </if>
-        ORDER BY id DESC
+        ORDER BY created_at DESC
         LIMIT #{limit}
     </select>
 
-    <!-- 自分がフォローしているユーザID一覧 -->
+    <!-- 自分がフォローしているユーザID一覧（新しい順） -->
     <select id="listFollowing" resultType="long">
         SELECT followee_id
         FROM follows
         WHERE follower_id = #{userId}
         <if test="cursorId != null">
-            AND id &lt; #{cursorId}
+            AND created_at &lt; to_timestamp(#{cursorId} / 1000.0)
         </if>
-        ORDER BY id DESC
+        ORDER BY created_at DESC
         LIMIT #{limit}
     </select>
-
 </mapper>

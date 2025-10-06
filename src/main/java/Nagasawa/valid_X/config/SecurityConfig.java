@@ -63,6 +63,10 @@ public class SecurityConfig {
                         // パスワードによるログイン,リフレッシュ
                         .requestMatchers(HttpMethod.POST, "/v1/auth/login", "/v1/auth/refresh").permitAll()
 
+                        // openapi自動生成
+                        .requestMatchers(
+                                "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+
                         .anyRequest().authenticated()
                 )
 

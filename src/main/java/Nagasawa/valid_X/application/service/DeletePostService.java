@@ -40,6 +40,7 @@ public class DeletePostService {
         int deletedMetrics = deleteMapper.deleteTweetMetricsById(tweetId);
 
         DeletePostResult result = DeletePostResult.builder()
+                .tweetId(tweetId)
                 .deletedTweet(deletedTweet)
                 .deletedLikes(deletedLikes)
                 .deletedReposts(deletedReposts)
