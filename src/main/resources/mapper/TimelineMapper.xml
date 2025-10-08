@@ -101,4 +101,25 @@
         LIMIT #{limit} + 1
     </select>
 
+    <select id="listPopularTweets" resultType="Nagasawa.valid_X.domain.dto.TweetView">
+        SELECT
+        <include refid="tweetViewColumns"/>,
+        EXISTS (
+        SELECT 1 FROM likes  l WHERE l.user_id = #{viewerId} AND l.tweet_id = t.tweet_id
+        ) AS likedByMe,
+        EXISTS (
+        SELECT 1 FROM reposts r WHERE r.user_id = #{viewerId} AND r.tweet_id = t.tweet_id
+        ) AS repostedByMe
+        FROM tweets t
+        JOIN users u ON u.id = t.user_id
+        LEFT JOIN tweet_metrics tm ON tm.tweet_id = t.tweet_id
+        WHERE
+        t.created_at > now() - make_interval(days => #{dayCount})
+        <if test="cursorLike != null and cursorId != null">
+            AND (tm.like_count, t.tweet_id) &lt; (#{cursorLike}, #{cursorId})
+        </if>
+        ORDER BY tm.like_count DESC, t.tweet_id DESC
+        LIMIT #{limit} + 1
+    </select>
+
 </mapper>

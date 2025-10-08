@@ -50,4 +50,17 @@ public class TimelineController {
         Long viewerId = Long.valueOf(jwt.getSubject());
         return ResponseEntity.ok(timelineQueryService.userTweets(targetUserId, cursor, limit, viewerId));
     }
+
+    // 直近N日(default:15日)で人気のツイートを順に取得
+    @GetMapping("/tweets/popular")
+    public ResponseEntity<Page<TweetView>> popularTweets(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam(value = "cursor_like", required = false) Long cursorLike,
+            @RequestParam(value = "cursor_id",   required = false) Long cursorId,
+            @RequestParam(value = "limit", defaultValue = "30") int limit,
+            @RequestParam(value = "day_count", defaultValue = "15") int dayCount
+    ) {
+        Long viewerId = Long.valueOf(jwt.getSubject());
+        return ResponseEntity.ok(timelineQueryService.popularTweets(viewerId, cursorLike, cursorId, limit, dayCount));
+    }
 }

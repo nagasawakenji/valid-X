@@ -16,6 +16,15 @@ public interface TimelineMapper {
             @Param("cursor") Long cursor,
             @Param("limit") int limit);
 
+    // 直近dayCount日でいいね数が多いツイートを取得
+    List<TweetView> listPopularTweets(
+            @Param("viewerId") Long viewerId,
+            @Param("cursorLike") Long cursorLike,
+            @Param("cursorId") Long cursorId,
+            @Param("limit") int limit,
+            @Param("dayCount") int dayCount
+    );
+
     // あるツイートへの返信一覧
     List<TweetView> listReplies(
             @Param("parentTweetId") Long parentTweetId,

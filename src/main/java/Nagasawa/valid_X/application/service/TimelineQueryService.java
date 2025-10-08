@@ -47,4 +47,10 @@ public class TimelineQueryService {
         List<TweetView> rows = timelineMapper.listUserTweets(targetUserId, cursor, limit, viewerId);
         return toPage(rows, limit);
     }
+
+    @Transactional(readOnly = true)
+    public Page<TweetView> popularTweets(Long viewerId, Long cursorLike, Long cursorId, int limit, int dayCount) {
+        List<TweetView> rows = timelineMapper.listPopularTweets(viewerId, cursorLike, cursorId, limit, dayCount);
+        return toPage(rows, limit);
+    }
 }
