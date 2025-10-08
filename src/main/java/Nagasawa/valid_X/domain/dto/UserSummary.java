@@ -9,5 +9,5 @@ public class UserSummary {
     String displayName;
     String locale;
     String timezone;
-    String avatarUrl; // なければ null。カラム無ければ削除してください
+    String avatarUrl;
 }

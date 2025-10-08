@@ -1,6 +1,7 @@
 package Nagasawa.valid_X.application.service;
 
 import Nagasawa.valid_X.domain.dto.FollowStatusResult;
+import Nagasawa.valid_X.domain.dto.UserSummary;
 import Nagasawa.valid_X.exception.notFoundProblems.NotFoundProblemException;
 import Nagasawa.valid_X.infra.mybatis.mapper.FollowMapper;
 import Nagasawa.valid_X.infra.mybatis.mapper.UserMapper; // ある前提（selectById用）
@@ -81,12 +82,16 @@ public class FollowService {
     }
 
     @Transactional(readOnly = true)
-    public List<Long> listFollowers(Long userId, Long cursor, int limit) {
-        return followMapper.listFollowers(userId, cursor, limit);
+    public List<UserSummary> listFollowers(Long userId, Long cursorId, int limit) {
+        List<Long> ids = followMapper.listFollowers(userId, cursorId, limit);
+
+        return userMapper.findSummariesByIds(ids);
     }
 
     @Transactional(readOnly = true)
-    public List<Long> listFollowing(Long userId, Long cursor, int limit) {
-        return followMapper.listFollowing(userId, cursor, limit);
+    public List<UserSummary> listFollowing(Long userId, Long cursor, int limit) {
+        List<Long> ids = followMapper.listFollowing(userId, cursor, limit);
+
+        return userMapper.findSummariesByIds(ids);
     }
 }

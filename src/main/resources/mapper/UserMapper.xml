@@ -5,7 +5,7 @@
     <resultMap id="UserSummaryMap" type="Nagasawa.valid_X.domain.dto.UserSummary">
         <result column="id"           property="id"/>
         <result column="username"     property="username"/>
-        <result column="display_name" property="displayDisplayName"/> <!-- NG: タイポ防止のため注意 -->
+        <result column="display_name" property="displayDisplayName"/>
     </resultMap>
 
     <!--select句-->
@@ -25,10 +25,12 @@
         SELECT
         u.id,
         u.username,
-        u.display_name   AS displayName,
+        u.display_name,
         u.locale,
         u.timezone,
+        p.avatar_url
         FROM users u
+        JOIN profiles p ON p.user_id = u.id
         WHERE u.id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
