@@ -20,5 +20,5 @@ public class UserSession {
     private Instant createdAt;    // 作成時刻
     private Instant lastSeenAt;   // 最後に使った時刻（任意更新）
     private Instant revokedAt;    // 無効化された時刻
-    private Instant expiresAt;    // 任意の超長期失効時刻（null 可）
+    private Instant expiresAt;    // 任意の超長期失効時刻（null 不可!!) (refreshの判別をここで行う)
 }

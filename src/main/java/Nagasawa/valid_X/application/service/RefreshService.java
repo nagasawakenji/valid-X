@@ -52,11 +52,17 @@ public class RefreshService {
 
         // RefreshToken取得
         RefreshToken rt = refreshTokenMapper.findActiveById(refreshId);
-        if (rt == null) throw new InvalidRefreshTokenProblemException("Invalid_refresh_token");
+        if (rt == null || rt.getRevokedAt() != null || !rt.getExpiresAt().isAfter(now)) {
+            throw new InvalidRefreshTokenProblemException("invalid_refresh_token");
+        }
+
 
         // UserSession取得
         UserSession session = userSessionMapper.findById(rt.getSessionId());
-        if (session == null) throw new InvalidSessionProblemException("Invalid_session_token");
+        if (session == null || session.getRevokedAt() != null || session.getExpiresAt() == null
+                || !session.getExpiresAt().isAfter(now)) {
+            throw new InvalidSessionProblemException("invalid_session_token");
+        }
 
         // RefreshTokenをrevoke
         refreshTokenMapper.revoke(rt.getId(), now);
@@ -77,7 +83,7 @@ public class RefreshService {
                 rt.getUserId(),
                 user.getUsername(),
                 session.getId(),
-                session.getSessionVersion()+1,
+                session.getSessionVersion(),
                 null
         );
 

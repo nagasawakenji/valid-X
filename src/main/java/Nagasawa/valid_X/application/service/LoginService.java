@@ -56,7 +56,7 @@ public class LoginService {
                 .userId(userId)
                 .sessionVersion(1)
                 .createdAt(now)
-                .expiresAt(null)
+                .expiresAt(now.plus(Duration.ofDays(refreshTtlDays)))
                 .build();
         sessionMapper.insert(session);
 
