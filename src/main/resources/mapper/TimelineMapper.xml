@@ -122,4 +122,36 @@
         LIMIT #{limit} + 1
     </select>
 
+    <!-- メディアの取得 -->
+    <select id="listMediaForTweetIds" resultType="Nagasawa.valid_X.domain.dto.GetMediaResult">
+        SELECT
+        tm.tweet_id          AS tweetId,
+        m.media_id           AS mediaId,
+        m.media_type         AS mediaType,
+        m.mime_type          AS mimeType,
+        m.bytes              AS bytes,
+        m.width              AS width,
+        m.height             AS height,
+        m.duration_ms        AS durationMs,
+        m.blurhash           AS blurhash,
+        m.storage_key        AS storageKey
+        FROM tweet_media tm
+        JOIN media m ON m.media_id = tm.media_id
+        WHERE
+        <choose>
+            <when test="tweetIds != null and tweetIds.size() > 0">
+                tm.tweet_id IN
+                <foreach collection="tweetIds" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </when>
+            <!-- 1 = 0 は必ずotherwiseでfalseを返すための記述-->
+            <otherwise>
+                1 = 0
+            </otherwise>
+        </choose>
+        ORDER BY tm.tweet_id, tm.position NULLS LAST, m.media_id
+    </select>
+
+
 </mapper>

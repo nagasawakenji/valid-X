@@ -1,7 +1,10 @@
 package Nagasawa.valid_X.application.mapper;
 
+import Nagasawa.valid_X.domain.dto.GetMediaResult;
+import Nagasawa.valid_X.domain.dto.GetPostResult;
 import Nagasawa.valid_X.domain.dto.MediaCreate;
 import Nagasawa.valid_X.domain.dto.PostForm;
+import Nagasawa.valid_X.domain.dto.TweetView;
 import Nagasawa.valid_X.domain.model.Media;
 import Nagasawa.valid_X.domain.model.Tweet;
 import Nagasawa.valid_X.domain.model.TweetMedia;
@@ -12,6 +15,8 @@ import org.mapstruct.Mappings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface TweetConverter {
@@ -76,6 +81,52 @@ public interface TweetConverter {
         }
 
         return links;
+    }
+
+    // TweetView -> GetPostResult（media は後段で詰めるのでここでは無視）
+    @Mappings({
+            @Mapping(source = "tweetId",           target = "tweetId"),
+            @Mapping(source = "userId",            target = "userId"),
+            @Mapping(source = "username",          target = "username"),
+            @Mapping(source = "content",           target = "content"),
+            @Mapping(source = "inReplyToTweetId",  target = "inReplyToTweetId"),
+            @Mapping(source = "createdAt",         target = "createdAt"),
+            @Mapping(source = "likeCount",         target = "likeCount"),
+            @Mapping(source = "repostCount",       target = "repostCount"),
+            @Mapping(source = "replyCount",        target = "replyCount"),
+            @Mapping(source = "likedByMe",         target = "likedByMe"),
+            @Mapping(source = "repostedByMe",      target = "repostedByMe"),
+            @Mapping(target = "media", ignore = true)
+    })
+    GetPostResult toGetPostResult(TweetView row);
+
+    // List<TweetView> -> List<GetPostResult>
+    // 単一要素マッピング（toGetPostResult）を使って MapStruct が自動生成します
+    List<GetPostResult> toGetPostResults(List<TweetView> rows);
+
+    // media を tweetId ごとにまとめる（tweetId -> List<GetMediaResult>）
+    default Map<Long, List<GetMediaResult>> groupMediaByTweetId(List<GetMediaResult> mediaList) {
+        if (mediaList == null || mediaList.isEmpty()) {
+            return Map.of();
+        }
+        return mediaList.stream()
+                .collect(Collectors.groupingBy(GetMediaResult::getTweetId, Collectors.toList()));
+    }
+
+    // posts に media を詰めて返す（不変DTOのため toBuilder で部分更新）
+    default List<GetPostResult> mergePostsWithMedia(List<GetPostResult> posts, List<GetMediaResult> mediaList) {
+        if (posts == null || posts.isEmpty()) {
+            return List.of();
+        }
+        Map<Long, List<GetMediaResult>> mediaMap =
+                groupMediaByTweetId(mediaList == null ? List.of() : mediaList);
+
+        List<GetPostResult> enriched = new ArrayList<>(posts.size());
+        for (GetPostResult p : posts) {
+            List<GetMediaResult> medias = mediaMap.getOrDefault(p.getTweetId(), List.of());
+            enriched.add(p.toBuilder().media(medias).build());
+        }
+        return enriched;
     }
 
 

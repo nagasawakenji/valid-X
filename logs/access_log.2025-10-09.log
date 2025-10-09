@@ -1,0 +1,16 @@
+[09/Oct/2025:22:35:52 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/request HTTP/1.1" 200 144160
+[09/Oct/2025:22:36:18 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/consume HTTP/1.1" 200 141221
+[09/Oct/2025:22:37:00 +0900] 0:0:0:0:0:0:0:1 "GET /v1/auth/csrf HTTP/1.1" 500 34411
+[09/Oct/2025:22:39:19 +0900] 0:0:0:0:0:0:0:1 "GET /v1/tweets/popular?limit=30&day_count=15 HTTP/1.1" 500 88209
+[09/Oct/2025:22:39:23 +0900] 0:0:0:0:0:0:0:1 "GET /v1/tweets/popular?limit=30&day_count=15 HTTP/1.1" 500 30614
+[09/Oct/2025:22:54:22 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/request HTTP/1.1" 200 130809
+[09/Oct/2025:22:54:51 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/consume HTTP/1.1" 200 120974
+[09/Oct/2025:22:55:12 +0900] 0:0:0:0:0:0:0:1 "GET /v1/auth/csrf HTTP/1.1" 500 32400
+[09/Oct/2025:22:55:31 +0900] 0:0:0:0:0:0:0:1 "GET /v1/tweets/popular?limit=30&day_count=15 HTTP/1.1" 200 63938
+[09/Oct/2025:22:58:51 +0900] 0:0:0:0:0:0:0:1 "GET /v1/timeline?limit=30 HTTP/1.1" 200 38225
+[09/Oct/2025:22:59:03 +0900] 0:0:0:0:0:0:0:1 "GET /v1/tweets/1/replies?limit=30 HTTP/1.1" 500 125002
+[09/Oct/2025:22:59:14 +0900] 0:0:0:0:0:0:0:1 "GET /v1/users/1/tweets?limit=30 HTTP/1.1" 200 23242
+[09/Oct/2025:22:59:23 +0900] 0:0:0:0:0:0:0:1 "GET /v1/tweets/1/replies?limit=30 HTTP/1.1" 500 25949
+[09/Oct/2025:23:10:01 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/request HTTP/1.1" 200 154393
+[09/Oct/2025:23:10:20 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/consume HTTP/1.1" 200 102596
+[09/Oct/2025:23:10:55 +0900] 0:0:0:0:0:0:0:1 "GET /v1/tweets/1/replies?limit=30 HTTP/1.1" 200 101626

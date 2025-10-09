@@ -1,6 +1,8 @@
 // infra/mybatis/mapper/TimelineMapper.java
 package Nagasawa.valid_X.infra.mybatis.mapper;
 
+import Nagasawa.valid_X.domain.dto.GetMediaResult;
+import Nagasawa.valid_X.domain.dto.GetPostResult;
 import Nagasawa.valid_X.domain.dto.TweetView;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -38,4 +40,7 @@ public interface TimelineMapper {
             @Param("cursor") Long cursor,
             @Param("limit") int limit,
             @Param("viewerId") Long viewerId);
+
+    // tweetIdのリストに対応するメディアを取得
+    List<GetMediaResult> listMediaForTweetIds(List<Long> tweetIds);
 }
