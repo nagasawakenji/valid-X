@@ -38,3 +38,11 @@
 [08/Oct/2025:13:05:17 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/consume HTTP/1.1" 200 100356
 [08/Oct/2025:13:05:50 +0900] 0:0:0:0:0:0:0:1 "GET /v1/auth/csrf HTTP/1.1" 500 31111
 [08/Oct/2025:13:05:59 +0900] 0:0:0:0:0:0:0:1 "GET /v1/tweets/popular?limit=10&day_count=15 HTTP/1.1" 200 65362
+[08/Oct/2025:21:35:47 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/request HTTP/1.1" 200 190258
+[08/Oct/2025:21:36:05 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/consume HTTP/1.1" 200 107626
+[08/Oct/2025:21:36:17 +0900] 0:0:0:0:0:0:0:1 "GET /v1/auth/csrf HTTP/1.1" 500 66007
+[08/Oct/2025:21:36:46 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/logout HTTP/1.1" 500 29854
+[08/Oct/2025:21:38:49 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/request HTTP/1.1" 200 139880
+[08/Oct/2025:21:39:12 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/consume HTTP/1.1" 200 146249
+[08/Oct/2025:21:39:42 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/logout HTTP/1.1" 404 36721
+[08/Oct/2025:21:43:38 +0900] 0:0:0:0:0:0:0:1 "POST /v1/logout HTTP/1.1" 200 130813
