@@ -42,41 +42,30 @@ public interface TweetConverter {
     })
     Tweet toTweet(Nagasawa.valid_X.domain.dto.PostForm form, Long userId);
 
-    // PostForm→mediaへのマッピング
+    // PostForm→mediaへのマッピング（MediaCreateの項目変更に追従。sha256 は無視）
     @Mappings({
             @Mapping(target = "mediaId", ignore = true),
-            @Mapping(target = "mediaType", source = "mediaCreate.mediaType"),
-            @Mapping(target = "mimeType", source = "mediaCreate.mimeType"),
-            @Mapping(target = "bytes", source = "mediaCreate.bytes"),
-            @Mapping(target = "width", source = "mediaCreate.width"),
-            @Mapping(target = "height", source = "mediaCreate.height"),
-            @Mapping(target = "durationMs", source = "mediaCreate.durationMs"),
-            @Mapping(target = "sha256", source = "mediaCreate.sha256"),
-            @Mapping(target = "blurhash", source = "mediaCreate.blurhash"),
-            @Mapping(target = "storageKey", source = "mediaCreate.storageKey"),
+            @Mapping(target = "mediaType", ignore = true),
+            @Mapping(target = "mimeType",  source = "mediaCreate.mimeType"),
+            @Mapping(target = "bytes",     ignore = true),
+            @Mapping(target = "width",     source = "mediaCreate.width"),
+            @Mapping(target = "height",    source = "mediaCreate.height"),
+            @Mapping(target = "durationMs",source = "mediaCreate.durationMs"),
+            @Mapping(target = "blurhash",  ignore = true),
+            @Mapping(target = "storageKey",ignore = true),
             @Mapping(target = "createdAt", ignore = true)
     })
     Media toMedia(Nagasawa.valid_X.domain.dto.MediaCreate mediaCreate);
-
-    // mediasの作成
-    @IterableMapping(qualifiedByName = "mapMedia")
-    default List<Nagasawa.valid_X.domain.model.Media> toMedias(Nagasawa.valid_X.domain.dto.PostForm form) {
-        if (form.medias() == null) return List.of();
-        List<Media> list = new ArrayList<>(form.medias().size());
-        for (MediaCreate m : form.medias()) {
-            list.add(toMedia(m));
-        }
-        return list;
-    }
 
     // tweetMediaの作成、tweetIdとmediaIdはINSERT後に生成されるので、INSERT後に使用すること
     default List<Nagasawa.valid_X.domain.model.TweetMedia> linkTweetMedias(Long tweetId, List<Long> mediaIdsOrder) {
         List<TweetMedia> links = new ArrayList<>(mediaIdsOrder.size());
         for (int i = 0; i < mediaIdsOrder.size(); i++) {
-            TweetMedia tm = new TweetMedia();
-            tm.setTweetId(tweetId);
-            tm.setMediaId(mediaIdsOrder.get(i));
-            tm.setPosition(i);
+            TweetMedia tm = TweetMedia.builder()
+                    .tweetId(tweetId)
+                    .mediaId(mediaIdsOrder.get(i))
+                    .position(i)
+                    .build();
             links.add(tm);
         }
 

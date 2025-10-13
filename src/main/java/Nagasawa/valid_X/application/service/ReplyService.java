@@ -28,6 +28,7 @@ public class ReplyService {
     private final TweetValidator tweetValidator;
     private final TweetConverter tweetConverter;
     private final TweetMetricsMapper tweetMetricsMapper;
+    private final LocalMediaStorageService localMediaStorageService;
 
     @Transactional
     public PostResult reply(Long parentTweetId, Long userId, PostForm postForm) {
@@ -39,38 +40,117 @@ public class ReplyService {
         Tweet tweet = tweetConverter.toTweet(postForm, userId);
         // postFormのinReplyToTweetを上書きする
         tweet.setInReplyToTweetId(parentTweetId);
-        List<Media> medias = tweetConverter.toMedias(postForm);
 
         tweetValidator.validateContent(tweet.getContent());
-        tweetValidator.validateMedia(medias);
 
-        // tweetのINSERT
+        // ツイート INSERT
         postMapper.insertTweet(tweet);
         Long tweetId = tweet.getTweetId();
 
-        // mediaのINSERT
-        List<Long> mediaIds = new ArrayList<>(medias.size());
-        for (Media m: medias) {
-            postMapper.insertMedia(m);
-            mediaIds.add(m.getMediaId());
-        }
-
-        // tweetMetricsのINSERT
+        // メトリクス初期化
         tweetMetricsMapper.insertInit(tweetId);
 
-        // tweetMediaの作成
-        List<TweetMedia> links = tweetConverter.linkTweetMedias(tweetId, mediaIds);
-        for (TweetMedia tm: links) {
-            postMapper.insertTweetMedia(tm);
+        // レスポンス用
+        List<Media> medias = new ArrayList<>();
+
+        // メディア処理（PostService と同等のロジック）
+        if (postForm.medias() != null && !postForm.medias().isEmpty()) {
+            for (int i = 0; i < postForm.medias().size(); i++) {
+                var m = postForm.medias().get(i);
+
+                // dataUrl ガード
+                if (m.dataUrl() == null || m.dataUrl().isBlank()) {
+                    log.warn("media[{}]: dataUrl is null/blank. Skip.", i);
+                    continue;
+                }
+
+                // bytes へ一度だけデコード
+                byte[] bytes;
+                try {
+                    bytes = decodeDataUrlBytes(m.dataUrl());
+                } catch (RuntimeException e) {
+                    log.warn("media[{}]: invalid dataUrl. Skip.", i, e);
+                    continue;
+                }
+                Long size = (long) bytes.length;
+
+                // MIME と拡張子
+                String mimeType = m.mimeType();          // 例: image/jpeg（null の可能性あり）
+                String ext = guessExt(mimeType);         // 例: .jpg
+                String targetFileName = "tweet_" + tweetId + "_" + i + ext;
+
+                // 永続化（ローカルディスク）
+                String storageKey;
+                try {
+                    storageKey = localMediaStorageService.saveBytes(bytes, targetFileName);
+                } catch (RuntimeException e) {
+                    log.warn("media[{}]: persist failed. Skip linking.", i, e);
+                    continue;
+                }
+                if (storageKey == null || storageKey.isBlank()) {
+                    log.warn("media[{}]: storageKey empty. Skip linking.", i);
+                    continue;
+                }
+
+                // Media モデルを組み立て
+                Media media = Media.builder()
+                        .mediaType(inferMediaType(mimeType))
+                        .mimeType(mimeType)
+                        .bytes(size)
+                        .width(m.width())
+                        .height(m.height())
+                        .durationMs(m.durationMs())
+                        .storageKey(storageKey)
+                        .build();
+
+                // INSERT
+                postMapper.insertMedia(media);
+
+                // リンク（position は i）
+                TweetMedia link = TweetMedia.builder()
+                        .tweetId(tweetId)
+                        .mediaId(media.getMediaId())
+                        .position(i)
+                        .build();
+                postMapper.insertTweetMedia(link);
+
+                // レスポンス用に保持
+                medias.add(media);
+            }
         }
 
         // 親ポストの返信数を+1する
         tweetMetricsMapper.incrementReply(parentTweetId);
 
         PostResult postResult = tweetConverter.toPostResult(tweet, medias);
-
         return postResult;
     }
 
+    // 後で共通化する
 
+    private String guessExt(String mime) {
+        if (mime == null) return ".bin";
+        return switch (mime) {
+            case "image/png" -> ".png";
+            case "image/jpeg" -> ".jpg";
+            case "image/gif" -> ".gif";
+            case "video/mp4" -> ".mp4";
+            case "video/quicktime" -> ".mov";
+            default -> ".bin";
+        };
+    }
+
+    private String inferMediaType(String mime) {
+        if (mime == null) return "image";
+        if (mime.startsWith("video/")) return "video";
+        if ("image/gif".equals(mime)) return "gif";
+        if (mime.startsWith("image/")) return "image";
+        return "image";
+    }
+
+    private byte[] decodeDataUrlBytes(String dataUrl) {
+        int comma = dataUrl.indexOf(',');
+        String base64 = dataUrl.substring(comma + 1);
+        return java.util.Base64.getDecoder().decode(base64);
+    }
 }

@@ -2,7 +2,6 @@ package Nagasawa.valid_X.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -26,8 +25,13 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cors = new CorsConfiguration();
-        cors.setAllowedOrigins(List.of("http://localhost:3000", "https://localhost:3000"));
+        cors.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "https://localhost:3000",
+                "https://app.example.com" // 本番用があれば
+        ));
         cors.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        // ★ ヘッダ名は X-XSRF-TOKEN を許可
         cors.setAllowedHeaders(List.of("Authorization","Content-Type","X-XSRF-TOKEN"));
         cors.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
@@ -35,35 +39,35 @@ public class SecurityConfig {
         return src;
     }
 
-    // --- 0: /v1/auth/** は認証不要（CSRF も使わないのであれば disable でOK） ---
-    @Bean @Order(0)
-    SecurityFilterChain publicChain(HttpSecurity http) throws Exception {
+    @Bean
+    protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/v1/auth/**", "/error")
-                .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(a -> a
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .anyRequest().permitAll()
-                );
-        return http.build();
-    }
-
-    // --- 1: それ以外は JWT 必須のチェーン ---
-    @Bean @Order(1)
-    SecurityFilterChain appChain(HttpSecurity http) throws Exception {
-        http
-                .cors(Customizer.withDefaults())
                 .csrf(csrf -> {
                     var repo = CookieCsrfTokenRepository.withHttpOnlyFalse();
+                    // ★ クロスサイトで Cookie を配るために必須
                     repo.setSecure(true);
                     repo.setCookieCustomizer(c -> c.sameSite("None"));
-                    csrf.csrfTokenRepository(repo);
+                    csrf
+                            // ★ /v1/auth/csrf は無効化しない（token を得るため）
+                            .ignoringRequestMatchers(
+                                    "/v1/auth/signup",
+                                    "/v1/auth/verify",
+                                    "/v1/auth/login",
+                                    "/v1/auth/magic-link/consume",
+                                    "/v1/auth/magic-link/request"
+                            )
+                            .csrfTokenRepository(repo);
                 })
+                .cors(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(a -> a
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/actuator/health", "/actuator/prometheus", "/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/auth/signup").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/auth/verify").permitAll()
+                        .requestMatchers(HttpMethod.GET,  "/v1/auth/magic-link/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/auth/magic-link/consume").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/auth/login", "/v1/auth/refresh").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(
@@ -71,7 +75,6 @@ public class SecurityConfig {
                 ));
         return http.build();
     }
-
 
 
     @Bean

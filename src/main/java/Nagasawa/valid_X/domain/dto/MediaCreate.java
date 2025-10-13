@@ -1,13 +1,9 @@
 package Nagasawa.valid_X.domain.dto;
 
 public record MediaCreate(
-        String mediaType,         // "image" / "video" など
-        String mimeType,
-        Long bytes,
-        int width,
-        int height,
-        int durationMs,
-        byte[] sha256,            // ← `Media` は byte じゃなく byte[] 推奨
-        String blurhash,
-        String storageKey
+        String dataUrl,     // ← 必須: "data:image/png;base64,...."
+        String mimeType,    // 任意: file.type があれば
+        Integer width,      // 任意: 取得できれば（無ければサーバで算出 or null）
+        Integer height,     // 任意
+        Integer durationMs  // 任意（動画ならあれば嬉しい。無ければサーバで）
 ) {}

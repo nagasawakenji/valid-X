@@ -6,7 +6,7 @@ import lombok.Value;
 public class GetMediaResult {
     Long tweetId;
     Long mediaId;
-    String type;
+    String mediaType;
     String mimeType;
     Long bytes;
     Integer width;
