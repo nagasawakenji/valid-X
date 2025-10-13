@@ -34,6 +34,7 @@ public class SignupService {
         String normalizedEmail = form.getEmail().trim().toLowerCase();
 
         // 既存チェックなど（必要なら）
+        // 現在は省いています (大量リクエストを想定する場合は有効化する予定)
         // if (pendingUserMapper.existsActiveByEmail(normalizedEmail)) {
         //     return new SignupResult(SignupStatus.DUPLICATE, normalizedEmail, null, null, null);
         // }
