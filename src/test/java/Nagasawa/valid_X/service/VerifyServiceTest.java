@@ -6,7 +6,6 @@ import Nagasawa.valid_X.application.service.VerificationService;
 import Nagasawa.valid_X.application.service.VerifyService;
 import Nagasawa.valid_X.domain.model.PendingUser;
 import Nagasawa.valid_X.event.MagicLoginLinkRequestedEvent;
-import Nagasawa.valid_X.event.VerificationMailRequestedEvent;
 import Nagasawa.valid_X.infra.mybatis.mapper.PendingUserMapper;
 import Nagasawa.valid_X.infra.mybatis.mapper.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,12 +48,12 @@ public class VerifyServiceTest {
     @Captor private ArgumentCaptor<Count> countCaptor;
     @Captor private ArgumentCaptor<UserPassword> userPasswordCaptor;
 
-    private Clock fixedTime;
+    private Clock fixedClock;
     private VerifyService verifyService;
 
     @BeforeEach
     void setup() {
-        fixedTime = Clock.fixed(Instant.parse("2025-10-13T12:00:00Z"), ZoneOffset.UTC);
+        fixedClock = Clock.fixed(Instant.parse("2025-10-13T12:00:00Z"), ZoneOffset.UTC);
         verifyService = new VerifyService(
                 pendingUserMapper,
                 userMapper,
@@ -71,7 +70,7 @@ public class VerifyServiceTest {
         // 認証用のurlToken
         String urlToken = "token123";
         byte[] tokenHash = new byte[]{1, 2, 3};
-        Instant now = Instant.now(fixedTime);
+        Instant now = Instant.now(fixedClock);
         Instant expiresAt = now.plus(Duration.ofMinutes(15));
         Instant checkTime = now.plus(Duration.ofMinutes(10));
 
