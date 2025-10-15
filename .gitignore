@@ -32,3 +32,8 @@ build/
 ### VS Code ###
 .vscode/
  /valid-x/storage/
+
+ # application設定ファイル（機密情報含むもの）
+ application.properties
+ application-*.properties
+ *.p12
