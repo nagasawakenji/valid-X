@@ -2,3 +2,15 @@
 [15/Oct/2025:14:26:31 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/request HTTP/1.1" 200 89686
 [15/Oct/2025:14:26:46 +0900] 0:0:0:0:0:0:0:1 "OPTIONS /v1/auth/magic-link/consume HTTP/1.1" 200 30727
 [15/Oct/2025:14:26:46 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/consume HTTP/1.1" 200 156857
+[15/Oct/2025:17:44:34 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/request HTTP/1.1" 200 136032
+[15/Oct/2025:17:45:00 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/consume HTTP/1.1" 200 180159
+[15/Oct/2025:17:45:57 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/refresh HTTP/1.1" 401 55964
+[15/Oct/2025:17:46:27 +0900] 0:0:0:0:0:0:0:1 "GET /v1/auth/csrf HTTP/1.1" 200 34366
+[15/Oct/2025:17:46:41 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/refresh HTTP/1.1" 401 9581
+[15/Oct/2025:17:47:56 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/refresh HTTP/1.1" 401 11415
+[15/Oct/2025:17:50:29 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/request HTTP/1.1" 200 30493
+[15/Oct/2025:17:50:56 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/consume HTTP/1.1" 200 37686
+[15/Oct/2025:17:52:51 +0900] 0:0:0:0:0:0:0:1 "GET /v1/auth/csrf HTTP/1.1" 200 13268
+[15/Oct/2025:17:52:59 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/refresh HTTP/1.1" 200 26541
+[15/Oct/2025:17:56:29 +0900] 0:0:0:0:0:0:0:1 "GET /v1/auth/csrf HTTP/1.1" 200 79458
+[15/Oct/2025:17:56:37 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/refresh HTTP/1.1" 401 22885
