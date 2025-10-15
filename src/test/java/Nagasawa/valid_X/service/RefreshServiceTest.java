@@ -105,7 +105,7 @@ class RefreshServiceTest {
 
         User user = User.builder()
                 .id(userId)
-                .username("kenji")
+                .username("TestUser")
                 .build();
 
         when(refreshTokenMapper.findActiveById(refreshId)).thenReturn(oldToken);

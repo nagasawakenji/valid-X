@@ -6,6 +6,7 @@ public class ProblemException extends RuntimeException {
 
     private final Problem problem;
     public ProblemException(Problem problem) {
+        super(problem.getDetail());
         this.problem = problem;
     }
 

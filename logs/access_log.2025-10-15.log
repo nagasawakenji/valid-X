@@ -1,0 +1,4 @@
+[15/Oct/2025:14:26:31 +0900] 0:0:0:0:0:0:0:1 "OPTIONS /v1/auth/magic-link/request HTTP/1.1" 200 54313
+[15/Oct/2025:14:26:31 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/request HTTP/1.1" 200 89686
+[15/Oct/2025:14:26:46 +0900] 0:0:0:0:0:0:0:1 "OPTIONS /v1/auth/magic-link/consume HTTP/1.1" 200 30727
+[15/Oct/2025:14:26:46 +0900] 0:0:0:0:0:0:0:1 "POST /v1/auth/magic-link/consume HTTP/1.1" 200 156857
