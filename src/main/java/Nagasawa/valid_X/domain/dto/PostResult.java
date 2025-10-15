@@ -1,5 +1,6 @@
 package Nagasawa.valid_X.domain.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
 
@@ -8,6 +9,7 @@ import java.util.List;
 
 @Value
 @Builder
+@AllArgsConstructor
 public class PostResult {
     Long tweetId;
     Long userId;
