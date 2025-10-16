@@ -111,7 +111,7 @@ class RefreshServiceTest {
         when(refreshTokenMapper.findActiveById(refreshId)).thenReturn(oldToken);
         when(userSessionMapper.findById(sessionId)).thenReturn(session);
         when(userMapper.findById(userId)).thenReturn(user);
-        when(jwtService.issueAccessToken(eq(userId), eq("kenji"), eq(sessionId), eq(2), isNull()))
+        when(jwtService.issueAccessToken(eq(userId), eq("TestUser"), eq(sessionId), eq(2), isNull()))
                 .thenReturn("mock-jwt");
 
         RefreshResult result = refreshService.refresh(refreshId);
