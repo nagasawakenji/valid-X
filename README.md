@@ -126,7 +126,7 @@ HTTPSを有効にして起動する場合：
 mvn spring-boot:run -Dspring-boot.run.profiles=https
 ```
 
-起動後、`https://localhost:8443` にアクセスします。
+起動後、`https://localhost:8443` にアクセスします。(フロント画面からapiを実行する際はこれをしないと認証が通らないので注意してください)
 
 ---
 
@@ -202,15 +202,187 @@ curl -v -sk -X POST https://localhost:8443/v1/auth/refresh \
   -d '{}'
 
 ```
-を実行してください。Jwtトークンが付与されます。
+を実行してください。Jwtトークンが付与されます。  
+その後は
+```bash
+ACCESS_TOKEN=<入手したアクセストークン>
+```
+としてください。以降の認証が必要なapiが実行できるようになります。
+
+---
+
+- /v1/auth/post  
+これはポストを投稿するapiです。
+```bash
+curl -v -sk -X POST https://localhost:8443/v1/posts \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-XSRF-TOKEN: $XSRF_MASKED" \
+  -b cookies.txt -c cookies.txt \
+  -d '{
+        "content": "初めての投稿です！",
+        "inReplyToTweet": null,
+        "medias": []
+      }'
+```
+---
+
+- /v1/tweets/{tweetId}/replies
+このapiではすでに存在するポストに対してリポストを実行します。
+```bash
+curl -v -sk -X POST https://localhost:8443/v1/tweets/25/replies \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-XSRF-TOKEN: $XSRF_MASKED" \
+  -b cookies.txt -c cookies.txt \
+  -d '{
+        "content": "その通りですね！",
+        "inReplyToTweet": null,
+        "medias": []
+      }'
+```
+
+---
+
+- /v1/tweets/{tweetId}/repost  
+リポスト機能を実装しています。
+```bash
+curl -v -sk -X PUT https://localhost:8443/v1/tweets/25/repost \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-XSRF-TOKEN: $XSRF_MASKED" \
+  -b cookies.txt -c cookies.txt
+```
+PUTを指定することでリポスト、
+```bash
+curl -v -sk -X DELETE https://localhost:8443/v1/tweets/25/repost \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-XSRF-TOKEN: $XSRF_MASKED" \
+  -b cookies.txt -c cookies.txt
+```
+DELETEを指定することでリポスト解除を実行します。
+
+---
+
+- /v1/tweets/{tweetId}/like  
+いいねが実行できます。
+```bash
+curl -v -sk -X PUT https://localhost:8443/v1/tweets/25/like \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-XSRF-TOKEN: $XSRF_MASKED" \
+  -b cookies.txt -c cookies.txt
+```
+
+___
+
+- /v1/timeline  
+フォローユーザーのポストが新着順で表示されます。
+```bash
+ curl -v -sk -G https://localhost:8443/v1/timeline \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-XSRF-TOKEN: $XSRF_MASKED" \
+  -b cookies.txt -c cookies.txt \
+  --data-urlencode "limit=30" \
+  --data-urlencode "cursor=100"
+```
+
+- /v1/tweets/{tweetId}/replies
+tweetIdで指定したポストへの返信を表示します
+```bash
+curl -v -sk -G https://localhost:8443/v1/tweets/25/replies \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-XSRF-TOKEN: $XSRF_MASKED" \
+  -b cookies.txt -c cookies.txt \
+  --data-urlencode "limit=30" \
+  --data-urlencode "cursor=200"
+```
+
+- /v1/users/{userId}/tweets
+userIdで指定したユーザーのポストを新着順で表示します
+```bash
+curl -v -sk -G https://localhost:8443/v1/users/1/tweets \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-XSRF-TOKEN: $XSRF_MASKED" \
+  -b cookies.txt -c cookies.txt \
+  --data-urlencode "limit=30" \
+  --data-urlencode "cursor=150"
+```
+- /v1/tweets/popular
+人気のポスト(cursor_likeで指定したいいね数以上)を新着順で取得します
+```bash
+ curl -v -sk -G https://localhost:8443/v1/tweets/popular \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-XSRF-TOKEN: $XSRF_MASKED" \
+  -b cookies.txt -c cookies.txt \
+  --data-urlencode "limit=30" \
+  --data-urlencode "cursor_like=500" \
+  --data-urlencode "cursor_id=1000" \
+  --data-urlencode "day_count=15"
+```
+
+---
+
+- /v1/tweets/{tweetId}/delete
+tweetIdで指定したポストを削除します(自分のポストでないと削除できません)
+```bash
+curl -v -sk -X DELETE https://localhost:8443/v1/tweets/25/delete \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-XSRF-TOKEN: $XSRF_MASKED" \
+  -b cookies.txt -c cookies.txt 
+```
+
+---
+
+- /v1/users/{userId}/follow
+PUT指定でuserIdで指定したユーザーをフォローします
+```bash
+ curl -v -sk -X PUT https://localhost:8443/v1/users/42/follow \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-XSRF-TOKEN: $XSRF_MASKED" \
+  -b cookies.txt -c cookies.txt
+```
+
+DELETE指定の場合はuserIdで指定したユーザーのフォローを解除します
+```bash
+curl -v -sk -X DELETE https://localhost:8443/v1/users/42/follow \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-XSRF-TOKEN: $XSRF_MASKED" \
+  -b cookies.txt -c cookies.txt
+```
+
+- /v1/users/{userId}/followers
+userIdで指定したユーザーのフォロワーを一覧表示します。  
+また、limitを指定することで、一度に表示するユーザー数の上限を指定できます。
+```bash
+ curl -v -sk -G https://localhost:8443/v1/users/42/followers \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-XSRF-TOKEN: $XSRF_MASKED" \
+  -b cookies.txt -c cookies.txt \
+  --data-urlencode "limit=30" \
+  --data-urlencode "cursor=100"
+```
+
+- /v1/users/{userId}/following
+userIdで指定したユーザーのフォローユーザーを一覧表示します。
+limitの使用は/followersと同じです。
+```bash
+ curl -v -sk -G https://localhost:8443/v1/users/42/following \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "X-XSRF-TOKEN: $XSRF_MASKED" \
+  -b cookies.txt -c cookies.txt \
+  --data-urlencode "limit=30" \
+  --data-urlencode "cursor=100"
+```
 
 
 
 
-### 🧰 今後の予定 
-- 🧱 Docker Compose による一括起動  
-- 🧪 テストの追加
-- 🏃‍♀️主要apiのドキュメント追加
+
+
+
+
+### 🧰 今後の予定
+- 🧪 テストの充実
+- 🏃‍♀️主要apiのドキュメント充実
 - 📺 フロントエンド機能の拡張
 
 ---
