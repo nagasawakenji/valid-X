@@ -32,6 +32,8 @@ build/
 ### VS Code ###
 .vscode/
  /valid-x/storage/
+ # test environment
+ src/test/resources/application-test.properties
 
  # application設定ファイル（機密情報含むもの）
  application.properties
