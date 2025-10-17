@@ -8,6 +8,19 @@
         <result column="display_name" property="displayDisplayName"/>
     </resultMap>
 
+    <resultMap id="UserMap" type="Nagasawa.valid_X.domain.dto.SearchUserSummary">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="displayName" column="display_name"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="locale" column="locale"/>
+        <result property="timezone" column="timezone"/>
+        <result property="bio" column="bio"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="followers" column="followers"/>
+        <result property="following" column="following"/>
+    </resultMap>
+
     <!--select句-->
     <select id="findById" parameterType="Long" resultType="Nagasawa.valid_X.domain.model.User">
         SELECT
@@ -19,6 +32,30 @@
             u.timezone
         FROM users u
         WHERE u.id = #{id}
+    </select>
+
+    <select id="searchByDisplayNameOrUsernamePrefix" resultMap="UserMap">
+        SELECT
+            u.id,
+            u.username,
+            u.display_name,
+            u.created_at,
+            u.locale,
+            u.timezone,
+            p.bio,
+            p.avatar_url,
+            c.followers,
+            c.following
+        FROM users u
+        LEFT JOIN profiles p ON p.user_id = u.id
+        LEFT JOIN counts c ON c.user_id = u.id
+        WHERE (u.display_name ILIKE CONCAT(#{prefix}, '%')
+        OR u.username ILIKE CONCAT(#{prefix}, '%'))
+        <if test="cursor != null">
+            AND id &gt; #{cursor}
+        </if>
+        ORDER BY id ASC
+        LIMIT #{limit}
     </select>
 
     <select id="findSummariesByIds" resultType="Nagasawa.valid_X.domain.dto.UserSummary">
