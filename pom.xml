@@ -159,7 +159,16 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-oauth2-jose</artifactId>
 		</dependency>
+
+		<!-- テスト用の組み込みDBとしてH2を用いる -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
+
+
 
 	<build>
 		<plugins>
