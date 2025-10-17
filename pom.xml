@@ -160,10 +160,11 @@
 			<artifactId>spring-security-oauth2-jose</artifactId>
 		</dependency>
 
-		<!-- テスト用の組み込みDBとしてH2を用いる -->
+		<!-- テスト用の組み込みDBとしてPostgreSQLを用いる -->
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>1.20.3</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

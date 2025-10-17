@@ -8,7 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
@@ -16,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @MybatisTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestPropertySource(locations = "classpath:application-test.properties")
+@Transactional
 public class UserMapperTest {
 
     @Autowired
@@ -25,8 +30,6 @@ public class UserMapperTest {
     private UserEmail userEmail;
     private Profile profile;
     private Count count;
-    private Tweet tweet;
-    private Media media;
     private TweetMedia tweetMedia;
 
     @BeforeEach
@@ -72,9 +75,6 @@ public class UserMapperTest {
     @AfterEach
     void reset() {
         userMapper.deleteUser(user);
-        userMapper.deleteUserEmail(user.getId());
-        userMapper.deleteProfile(user.getId());
-        userMapper.deleteCount(user.getId());
     }
 
     @Test
@@ -131,25 +131,5 @@ public class UserMapperTest {
         int deleted = userMapper.deleteUser(user);
         assertThat(deleted).isEqualTo(1);
         assertThat(userMapper.findById(user.getId())).isNull();
-    }
-
-    @Test
-    @DisplayName("正常系: profileが正しく削除できる")
-    void deleteProfile_success() {
-        // 1. プロファイル削除前に再挿入は失敗する（userIdはPKなのでinsertで例外になるはず）ので、削除件数で判定
-        int deleted = userMapper.deleteProfile(user.getId());
-        assertThat(deleted).isEqualTo(1);
-        // 2回目は既に削除済みなので0件
-        int deletedAgain = userMapper.deleteProfile(user.getId());
-        assertThat(deletedAgain).isEqualTo(0);
-    }
-
-    @Test
-    @DisplayName("正常系: countが正しく削除できる")
-    void deleteCount_success() {
-        int deleted = userMapper.deleteCount(user.getId());
-        assertThat(deleted).isEqualTo(1);
-        int deletedAgain = userMapper.deleteCount(user.getId());
-        assertThat(deletedAgain).isEqualTo(0);
     }
 }

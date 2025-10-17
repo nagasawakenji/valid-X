@@ -146,19 +146,4 @@
         WHERE id = #{id}
     </delete>
 
-    <delete id="deleteUserEmail" parameterType="long">
-        DELETE FROM user_emails
-        WHERE user_id = #{userId}
-    </delete>
-
-    <delete id="deleteProfile" parameterType="long">
-        DELETE FROM profiles
-        WHERE user_id = #{userId}
-    </delete>
-
-    <delete id="deleteCount" parameterType="long">
-        DELETE FROM counts
-        WHERE user_id = #{userId}
-    </delete>
-
 </mapper>

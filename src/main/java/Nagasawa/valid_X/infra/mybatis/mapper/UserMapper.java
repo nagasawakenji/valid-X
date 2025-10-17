@@ -52,22 +52,15 @@ public interface UserMapper {
     // emailが存在するかどうか
     boolean existsByEmail(String email);
 
-    // userEmailの削除
-    int deleteUserEmail(Long userId);
-
     /*
        profilesテーブルに関するDMLはここに追加していく
     */
     int insertProfile(Profile profile);
 
-    int deleteProfile(Long userId);
-
     /*
        countsテーブルに関するDMLはここに追加していく
     */
     int insertCount(Count count);
-
-    int deleteCount(Long userId);
 
     /*
        user_passwordsテーブルに関するDMLはここに追加していく
