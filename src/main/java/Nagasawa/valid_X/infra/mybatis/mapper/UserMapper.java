@@ -1,5 +1,6 @@
 package Nagasawa.valid_X.infra.mybatis.mapper;
 
+import Nagasawa.valid_X.domain.dto.SearchUserSummary;
 import Nagasawa.valid_X.domain.dto.UserSummary;
 import Nagasawa.valid_X.domain.model.*;
 import org.apache.ibatis.annotations.Mapper;
@@ -15,6 +16,13 @@ public interface UserMapper {
     */
     // idで1件取得
     User findById(Long id);
+
+    // DisplayNemaで複数件取得
+    List<SearchUserSummary> searchByDisplayNameOrUsernamePrefix(
+            @Param("prefix") String prefix,
+            @Param("cursor") Long cursor,
+            @Param("limit") int limit
+    );
 
     // idで複数件取得
     List<UserSummary> findSummariesByIds(@Param("ids") List<Long> ids);
