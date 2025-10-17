@@ -2,17 +2,28 @@ name: Run Tests
 
 on:
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [ main, develop ]
   push:
-    branches:
-      - main
-      - develop
+    branches: [ main, develop ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: validxadmin
+          POSTGRES_PASSWORD: postgre
+          POSTGRES_DB: validx_test
+        options: >-
+          --health-cmd "pg_isready -U validxadmin -d validx_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout repository
@@ -31,6 +42,21 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+
+      - name: Wait for PostgreSQL
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          for i in {1..20}; do
+            nc -z localhost 5432 && echo "Postgres is up!" && break
+            echo "Waiting ($i)..."
+            sleep 2
+          done
+
+      - name: Set environment variables
+        run: |
+          echo "SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/validx_test" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_USERNAME=validxadmin" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_PASSWORD=postgre" >> $GITHUB_ENV
 
       - name: Build and run tests
         run: mvn clean verify -B
