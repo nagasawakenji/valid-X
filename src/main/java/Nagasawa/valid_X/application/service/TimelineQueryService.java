@@ -31,7 +31,7 @@ public class TimelineQueryService {
         }
 
         // 次のpost取得でnextCursor未満のものが取得される
-        return new Page<>(pageItems, nextCursor);
+        return new Page<>(pageItems, nextCursor, null);
     }
 
     @Transactional(readOnly = true)
@@ -84,6 +84,19 @@ public class TimelineQueryService {
         List<GetMediaResult> getMediaResults = timelineMapper.listMediaForTweetIds(tweetIds);
         List<GetPostResult> getPostResults = tweetConverter.mergePostsWithMedia(getPostResultsRaw, getMediaResults);
 
-        return toPage(getPostResults, limit);
+        boolean hasNext = getPostResults.size() > limit;
+        List<GetPostResult> pageItems = hasNext ? getPostResults.subList(0, limit) : getPostResults;
+
+
+        // cursorLikeはここでのみ用いるので、別途処理する
+        Long nextCursorId = null;
+        Long nextCursorLike = null;
+        if (hasNext && !pageItems.isEmpty()) {
+            GetPostResult last = pageItems.get(pageItems.size() - 1);
+            nextCursorId = last.getTweetId();
+            nextCursorLike = last.getLikeCount();
+        }
+
+        return new Page<>(pageItems, nextCursorId, nextCursorLike);
     }
 }
