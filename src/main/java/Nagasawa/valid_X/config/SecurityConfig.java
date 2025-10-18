@@ -54,7 +54,8 @@ public class SecurityConfig {
                                     "/v1/auth/verify",
                                     "/v1/auth/login",
                                     "/v1/auth/magic-link/consume",
-                                    "/v1/auth/magic-link/request"
+                                    "/v1/auth/magic-link/request",
+                                    "/v1/auth/refresh"
                             )
                             .csrfTokenRepository(repo);
                 })
