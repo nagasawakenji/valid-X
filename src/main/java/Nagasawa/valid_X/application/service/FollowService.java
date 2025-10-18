@@ -85,12 +85,21 @@ public class FollowService {
     public List<UserSummary> listFollowers(Long userId, Long cursorId, int limit) {
         List<Long> ids = followMapper.listFollowers(userId, cursorId, limit);
 
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+
         return userMapper.findSummariesByIds(ids);
     }
 
     @Transactional(readOnly = true)
     public List<UserSummary> listFollowing(Long userId, Long cursor, int limit) {
         List<Long> ids = followMapper.listFollowing(userId, cursor, limit);
+
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+
 
         return userMapper.findSummariesByIds(ids);
     }
