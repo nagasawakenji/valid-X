@@ -270,12 +270,10 @@ public class FollowServiceTest {
         int limit = 5;
 
         when(followMapper.listFollowers(userId, cursorId, limit)).thenReturn(List.of());
-        when(userMapper.findSummariesByIds(List.of())).thenReturn(List.of());
 
         List<UserSummary> result = followService.listFollowers(userId, cursorId, limit);
 
         verify(followMapper).listFollowers(userId, cursorId, limit);
-        verify(userMapper).findSummariesByIds(List.of());
         assertThat(result).isEmpty();
     }
 
@@ -311,12 +309,10 @@ public class FollowServiceTest {
         int limit = 10;
 
         when(followMapper.listFollowing(userId, cursor, limit)).thenReturn(List.of());
-        when(userMapper.findSummariesByIds(List.of())).thenReturn(List.of());
 
         List<UserSummary> result = followService.listFollowing(userId, cursor, limit);
 
         verify(followMapper).listFollowing(userId, cursor, limit);
-        verify(userMapper).findSummariesByIds(List.of());
         assertThat(result).isEmpty();
     }
 
