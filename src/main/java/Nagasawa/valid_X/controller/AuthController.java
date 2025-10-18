@@ -51,7 +51,7 @@ public class AuthController {
 
             // 新しい Refresh Cookie をセットし、アクセストークンと TTL を返却
             return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, result.jwt())
+                    .header(HttpHeaders.SET_COOKIE, result.jwt(), result.cookie().toString())
                     .body(new LoginResponse(result.jwt(), result.accessTtlSecond()));
         } catch (RuntimeException ex) {
             // 失敗時はクッキーを削除して 401（内容は漏らさない）
