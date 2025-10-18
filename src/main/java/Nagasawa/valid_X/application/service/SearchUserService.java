@@ -30,7 +30,7 @@ public class SearchUserService {
         }
 
         // 次のpost取得でnextCursor未満のものが取得される
-        return new Page<>(pageItems, nextCursor);
+        return new Page<>(pageItems, nextCursor, null);
     }
 
     @Transactional
