@@ -1,10 +1,15 @@
 package Nagasawa.valid_X.domain.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Value;
 import java.util.List;
 
 @Value
+@Builder
+@AllArgsConstructor
 public class Page<T> {
     List<T> items;
-    Long nextCursor; // まだ続きがある場合は次に渡すcarosr(tweet_id)
+    Long nextCursor;
+    Long nextCursorLike;
 }
