@@ -115,10 +115,10 @@
         LEFT JOIN tweet_metrics tm ON tm.tweet_id = t.tweet_id
         WHERE
         t.created_at > now() - make_interval(days => #{dayCount})
-        <if test="cursorLike != null and cursorId != null">
-            AND (tm.like_count, t.tweet_id) &lt; (#{cursorLike}, #{cursorId})
+        <if test="cursorId != null">
+            AND (COALESCE(tm.like_count, 0), t.tweet_id) &lt; (COALESCE(#{cursorLike}, 0), #{cursorId})
         </if>
-        ORDER BY tm.like_count DESC, t.tweet_id DESC
+        ORDER BY COALESCE(tm.like_count, 0) DESC, t.tweet_id DESC
         LIMIT #{limit} + 1
     </select>
 
