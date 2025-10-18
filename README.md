@@ -149,9 +149,9 @@ CI環境（GitHub Actionsなど）では自動で実行されます。
 
 #### 1. マジックリンク認証リクエスト
 ```bash
-curl -X POST http://localhost:8080/v1/auth/magic-link/request \
+curl -sk -c cookies.txt -b cookies.txt https://localhost:8443/v1/auth/magic-link/request \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com"}'
+  -d '{"email":"alice@example.com"}'
 ```
 MailHogを使用している場合は、  
 `http://localhost:8025` にアクセスしてメールを確認できます。
@@ -162,7 +162,7 @@ MailHogを使用している場合は、
 ```bash
 curl -sk -c cookies.txt -b cookies.txt https://localhost:8443/v1/auth/magic-link/consume \
   -H "Content-Type: application/json" \
-  -d '{"token":<入手したurlトークンを貼り付けてください>}'
+  -d '{"token":"<入手したurlトークンを貼り付けてください>"}'
 ```
 
 #### 3. JWT付きAPIアクセス例
@@ -228,9 +228,9 @@ curl -v -sk -X POST https://localhost:8443/v1/posts \
 ---
 
 - /v1/tweets/{tweetId}/replies
-このapiではすでに存在するポストに対してリポストを実行します。
+このapiではすでに存在するポストに対してリプライを実行します。
 ```bash
-curl -v -sk -X POST https://localhost:8443/v1/tweets/25/replies \
+curl -v -sk -X POST https://localhost:8443/v1/tweets/25/reply \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $ACCESS_TOKEN" \
   -H "X-XSRF-TOKEN: $XSRF_MASKED" \

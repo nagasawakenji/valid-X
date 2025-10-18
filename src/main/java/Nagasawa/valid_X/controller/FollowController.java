@@ -41,7 +41,6 @@ public class FollowController {
         return ResponseEntity.ok(result);
     }
 
-    // 参考: 一覧（IDだけ返すシンプル版。後でプロフィールJoinに拡張）
     @GetMapping("/{userId}/followers")
     public ResponseEntity<List<UserSummary>> followers(
             @PathVariable("userId") Long userId,
