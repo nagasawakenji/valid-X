@@ -32,12 +32,12 @@ build/
 ### VS Code ###
 .vscode/
  /valid-x/storage/
- # test environment
- src/test/resources/application-test.properties
+# test environment
+src/test/resources/application-test.properties
 
- # application設定ファイル（機密情報含むもの）
- application.properties
- application-*.properties
- *.p12
+# application設定ファイル（機密情報含むもの）
+application.properties
+application-*.properties
+*.p12
 
- .env
+.env
