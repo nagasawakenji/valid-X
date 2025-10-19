@@ -20,10 +20,10 @@ jobs:
           POSTGRES_PASSWORD: postgre
           POSTGRES_DB: validx_test
         options: >-
-          --health-cmd "pg_isready -U validxadmin -d validx_test"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd="pg_isready -U validxadmin -d validx_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Checkout repository
@@ -54,9 +54,20 @@ jobs:
 
       - name: Set environment variables
         run: |
+          echo "SPRING_PROFILES_ACTIVE=test" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/validx_test" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_USERNAME=validxadmin" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_PASSWORD=postgre" >> $GITHUB_ENV
+
+          # 以下はアプリが起動時に参照する .env の代替
+          echo "APP_JWT_SECRET=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" >> $GITHUB_ENV
+          echo "APP_HMAC_K1=abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef" >> $GITHUB_ENV
+          echo "APP_STORAGE_PATH=/tmp/storage" >> $GITHUB_ENV
+          echo "APP_PUBLIC_URL=https://localhost:8443/media/" >> $GITHUB_ENV
+          echo "MAIL_HOST=smtp.example.com" >> $GITHUB_ENV
+          echo "MAIL_PORT=587" >> $GITHUB_ENV
+          echo "MAIL_USERNAME=test" >> $GITHUB_ENV
+          echo "MAIL_PASSWORD=test" >> $GITHUB_ENV
 
       - name: Build and run tests
         run: mvn clean verify -B
