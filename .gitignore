@@ -44,3 +44,4 @@ application-*.properties
 # ローカル開発用ストレージディレクトリ（中身のみ無視）
 /storage/*
 !/storage/.gitkeep
+valid-X-clean/
