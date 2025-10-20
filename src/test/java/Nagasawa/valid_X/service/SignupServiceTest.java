@@ -8,6 +8,7 @@ import Nagasawa.valid_X.domain.dto.SignupStatus;
 import Nagasawa.valid_X.domain.model.PendingUser;
 import Nagasawa.valid_X.event.VerificationMailRequestedEvent;
 import Nagasawa.valid_X.infra.mybatis.mapper.PendingUserMapper;
+import Nagasawa.valid_X.infra.mybatis.mapper.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,8 @@ public class SignupServiceTest {
     private Clock clock;
     @Mock
     private PendingUserMapper pendingUserMapper;
+    @Mock
+    private UserMapper userMapper;
 
     @Captor
     private ArgumentCaptor<PendingUser> pendingUserCaptor;
@@ -56,7 +59,8 @@ public class SignupServiceTest {
                 applicationEventPublisher,
                 passwordEncoder,
                 fixedClock,
-                pendingUserMapper
+                pendingUserMapper,
+                userMapper
                 );
     }
 
@@ -77,6 +81,8 @@ public class SignupServiceTest {
         String urlToken = "token123";
         byte[] tokenHash = new byte[]{1, 2, 3};
 
+        when(pendingUserMapper.existsActiveByEmail("test@example.com")).thenReturn(false);
+        when(userMapper.existsByUsername("TestUser")).thenReturn(false);
         when(verificationService.generateVerificationUrlToken()).thenReturn(urlToken);
         when(verificationService.hashToken(urlToken)).thenReturn(tokenHash);
         when(passwordEncoder.encode("secret123")).thenReturn("hashed-pass");
@@ -126,8 +132,8 @@ public class SignupServiceTest {
         // Arrange
         RegisterForm form = new RegisterForm(
                 "fail@example.com",
-                "FailUser",
                 "DisplayFail",
+                "FailUser",
                 "secret123",
                 "ja",
                 "Asia/Tokyo"
@@ -152,6 +158,65 @@ public class SignupServiceTest {
         verify(pendingUserMapper).insertPendingUser(any());
 
         // 例外後なので、publishEvent は呼ばれていない
+        verify(applicationEventPublisher, never()).publishEvent(any());
+    }
+
+    @Test
+    @DisplayName("正常系: 既にPendingUserが存在する場合はDUPLICATEを返す")
+    void signup_returnsDuplicate_whenPendingUserAlreadyExists() {
+        // Arrange
+        RegisterForm form = new RegisterForm(
+                "NewUser",
+                "NewDisplay",
+                "existing@example.com",
+                "password123",
+                "en",
+                "UTC"
+        );
+
+        when(pendingUserMapper.existsActiveByEmail("existing@example.com")).thenReturn(true);
+
+        // 実行
+        SignupResult result = signupService.signup(form);
+
+        // 検証
+        assertThat(result.status()).isEqualTo(SignupStatus.DUPLICATE);
+        assertThat(result.email()).isEqualTo("existing@example.com");
+
+        // insertPendingUser は呼ばれていない
+        verify(pendingUserMapper, never()).insertPendingUser(any());
+
+        // イベントも発行されていない
+        verify(applicationEventPublisher, never()).publishEvent(any());
+    }
+
+    @Test
+    @DisplayName("正常系: 既にユーザー名が存在する場合はDUPLICATEを返す")
+    void signup_returnsDuplicate_whenUsernameAlreadyExists() {
+        // Arrange
+        RegisterForm form = new RegisterForm(
+                "existingUser",
+                "DisplayName",
+                "newuser@example.com",
+                "password123",
+                "en",
+                "UTC"
+        );
+
+        when(pendingUserMapper.existsActiveByEmail("newuser@example.com")).thenReturn(false);
+        when(userMapper.existsByUsername("existingUser")).thenReturn(true);
+
+        // 実行
+        SignupResult result = signupService.signup(form);
+
+        // 検証
+        assertThat(result.status()).isEqualTo(SignupStatus.DUPLICATE);
+        assertThat(result.email()).isEqualTo("newuser@example.com");
+
+        // insertPendingUser は呼ばれていない
+        verify(pendingUserMapper, never()).insertPendingUser(any());
+
+        // イベントも発行されていない
         verify(applicationEventPublisher, never()).publishEvent(any());
     }
 }
