@@ -18,7 +18,7 @@ public class HmacKeyConfig {
     private short active;
 
     // 64桁HEX(=32バイト)の例。必要に応じて複数世代
-    @Value("${app.hmac.k1:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}")
+    @Value("${app.hmac.k1:}")
     private String k1;
 
     @Value("${app.hmac.k2:}")
