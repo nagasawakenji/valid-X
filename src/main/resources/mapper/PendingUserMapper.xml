@@ -67,6 +67,13 @@
         WHERE p.token_hash = #{tokenHash, jdbcType=BINARY, javaType=_byte[]}
     </select>
 
+    <select id="existsActiveByEmail" parameterType="string" resultType="boolean">
+        SELECT EXISTS (
+        SELECT 1 FROM pending_users
+        WHERE email = #{email} AND verified = FALSE
+        )
+    </select>
+
     <!--insert句-->
     <insert id="insertPendingUser" parameterType="Nagasawa.valid_X.domain.model.PendingUser" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO pending_users (username, display_name, email, password_hash, token_hash, expires_at, verified, resend_count, last_sent_at, locale, timezone)

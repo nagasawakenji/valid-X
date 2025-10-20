@@ -70,7 +70,7 @@ public class SignupControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(form)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.status").value("DUPLICATED"));
+                .andExpect(jsonPath("$.status").value("DUPLICATE"));
 
     }
 }

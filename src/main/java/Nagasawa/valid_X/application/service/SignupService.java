@@ -7,6 +7,7 @@ import Nagasawa.valid_X.domain.dto.SignupStatus;
 import Nagasawa.valid_X.event.VerificationMailRequestedEvent;
 import Nagasawa.valid_X.infra.mybatis.mapper.PendingUserMapper;
 import Nagasawa.valid_X.domain.model.PendingUser;
+import Nagasawa.valid_X.infra.mybatis.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -27,17 +28,22 @@ public class SignupService {
     private final PasswordEncoder passwordEncoder;
     private final Clock clock;
     private final PendingUserMapper pendingUserMapper;
+    private final UserMapper userMapper;
 
     @Transactional
     public SignupResult signup(RegisterForm form) {
         Instant now = Instant.now(clock);
         String normalizedEmail = form.getEmail().trim().toLowerCase();
 
-        // 既存チェックなど（必要なら）
-        // 現在は省いています (大量リクエストを想定する場合は有効化する予定)
-        // if (pendingUserMapper.existsActiveByEmail(normalizedEmail)) {
-        //     return new SignupResult(SignupStatus.DUPLICATE, normalizedEmail, null, null, null);
-        // }
+        // すでに登録を行なっていないかのチェック
+        if (pendingUserMapper.existsActiveByEmail(normalizedEmail)) {
+            return new SignupResult(SignupStatus.DUPLICATE, normalizedEmail, null, null);
+        }
+
+        // 既存ユーザーとのusername競合チェック
+        if (userMapper.existsByUsername(form.getUsername())) {
+            return new SignupResult(SignupStatus.DUPLICATE, normalizedEmail, null, null);
+        }
 
         String urlToken = verificationService.generateVerificationUrlToken();
         byte[] tokenHash = verificationService.hashToken(urlToken);

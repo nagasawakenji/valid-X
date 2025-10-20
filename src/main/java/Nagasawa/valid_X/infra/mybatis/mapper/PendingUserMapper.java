@@ -9,6 +9,9 @@ public interface PendingUserMapper {
     // idで1件取得
     PendingUser findPendingUserById(Long id);
 
+    //
+    boolean existsActiveByEmail(String email);
+
     // tokenHashで1件取得
     PendingUser findPendingUserByTokenHash(byte[] tokenHash);
 
