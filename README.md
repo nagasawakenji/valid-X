@@ -82,21 +82,27 @@ ___
 ### ⚙️ 環境変数の設定
 セキュリティ情報は `.env` ファイルまたは環境変数で管理します。
 
-`.env.example` をコピーして `.env` を作成し、必要な値を設定してください。
-
-```bash
-cp .env.example .env
-```
-
+以下の例を参考にして、`.env`ファイルをvalid-X直下に作成してください。  
 `.env` の例：
 ```bash
-DB_URL=jdbc:postgresql://localhost:5432/validx
-DB_USER=validxadmin
-DB_PASS=postgre
-JWT_SECRET=CHANGE_ME_TO_LONG_RANDOM_SECRET
-HMAC_KEY1=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-MAIL_HOST=localhost
-MAIL_PORT=1025
+# --- DB ---
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/validx
+SPRING_DATASOURCE_USERNAME=yourname
+SPRING_DATASOURCE_PASSWORD=yourpassword
+
+# --- JWT / HMAC ---
+APP_JWT_SECRET=CHANGE_ME
+APP_HMAC_K1=CHNGE_ME
+
+# --- Storage ---
+APP_STORAGE_PATH=/Users/you/Downloads/valid-x/storage
+APP_PUBLIC_URL=https://localhost:8443/media/
+
+# --- Mail ---
+MAIL_HOST=smtp.example.com
+MAIL_PORT=587
+MAIL_USERNAME=your-username
+MAIL_PASSWORD=your-password
 ```
 
 > ⚠️ 本番環境では `.env` を絶対に公開しないでください。
@@ -124,7 +130,11 @@ mvn spring-boot:run
 
 HTTPSを有効にして起動する場合：
 ```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=https
+# 1. 環境変数を読み込む (.env がプロジェクト直下にあることを確認)
+export $(grep -v '^#' .env | xargs)
+
+# 2. HTTPS プロファイルでアプリを起動
+mvn spring-boot:run -Dspring-boot.run.profiles=https -Dspring-boot.run.fork=false
 ```
 
 起動後、`https://localhost:8443` にアクセスします。(フロント画面からapiを実行する際はこれをしないと認証が通らないので注意してください)

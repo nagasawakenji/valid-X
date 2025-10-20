@@ -31,7 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
 /valid-x/storage/
+
 # test environment
 src/test/resources/application-test.properties
 
@@ -40,8 +42,12 @@ application.properties
 application-*.properties
 *.p12
 
-.env
 # ローカル開発用ストレージディレクトリ（中身のみ無視）
 /storage/*
 !/storage/.gitkeep
+
+# 環境変数ファイル
+.env
+
+# 一時的なローカルレポジトリなど
 valid-X-clean/
