@@ -9,7 +9,7 @@ public interface PendingUserMapper {
     // idで1件取得
     PendingUser findPendingUserById(Long id);
 
-    //
+    // emailで存在判定
     boolean existsActiveByEmail(String email);
 
     // tokenHashで1件取得
