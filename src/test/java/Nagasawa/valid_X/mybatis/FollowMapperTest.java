@@ -150,8 +150,8 @@ public class FollowMapperTest {
     void listFollowers_success() {
         followMapper.insert(follow.getFollowerId(), follow.getFolloweeId());
 
-        List<Long> followerIds = followMapper.listFollowers(follow.getFollowerId(), null, 10);
-        assertThat(followerIds).isEqualTo(List.of(follow.getFolloweeId()));
+        List<Long> followerIds = followMapper.listFollowers(follow.getFolloweeId(), null, 10);
+        assertThat(followerIds).isEqualTo(List.of(follow.getFollowerId()));
     }
 
     // listFollowingのテストコード
