@@ -60,8 +60,8 @@ public class OneTimeLoginTokenService {
         log.info("[DEV] magic token (base64url) = {}", token);
 
         String url = appBaseUrl.endsWith("/")
-                ? appBaseUrl + "magic?token=" + token
-                : appBaseUrl + "/magic?token=" + token;
+                ? appBaseUrl + "v1/auth/magic-link/consume?token=" + token
+                : appBaseUrl + "/v1/auth/magic-link/consume?token=" + token;
 
         return MagicLinkIssue.builder()
                 .url(url)
