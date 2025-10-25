@@ -48,7 +48,7 @@ public class VerificationService {
 
     // 認証メール送信
     public void sendVerificationMail(String toEmail, String urlToken) throws MessagingException {
-        String verifyUrl = "https://example.com/verify?token=" + urlToken;
+        String verifyUrl = "https://localhost:8443/v1/auth/verify?token=" + urlToken;
 
         MimeMessage message = javaMailSender.createMimeMessage();
         // メール組み立てに用いる

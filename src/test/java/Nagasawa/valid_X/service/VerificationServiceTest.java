@@ -73,6 +73,6 @@ public class VerificationServiceTest {
         assertThat(mimeMessage.getAllRecipients()[0].toString()).isEqualTo("user@example.com");
         assertThat(mimeMessage.getSubject()).contains("Verify your account");
         assertThat(mimeMessage.getContent().toString())
-                .contains("https://example.com/verify?token=token123");
+                .contains("https://localhost:8443/v1/auth/verify?token=token123");
     }
 }
