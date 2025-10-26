@@ -17,5 +17,5 @@ RUN ./mvnw dependency:go-offline -B
 COPY src/ src/
 
 # アプリ起動（開発モード）
-EXPOSE 8080
-CMD ["./mvnw", "spring-boot:run"]
+EXPOSE 8443
+CMD ["./mvnw", "spring-boot:run", "-Dspring-boot.run.profiles=https"]
