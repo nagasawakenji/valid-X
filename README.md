@@ -86,7 +86,7 @@ ___
 `.env` の例：
 ```bash
 # --- DB ---
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/validx
+SPRING_DATASOURCE_URL=jdbc:postgresql://postgre:5432/validx
 SPRING_DATASOURCE_USERNAME=yourname
 SPRING_DATASOURCE_PASSWORD=yourpassword
 
@@ -104,12 +104,24 @@ MAIL_PORT=587
 MAIL_USERNAME=your-username
 MAIL_PASSWORD=your-password
 ```
-
+(ローカル環境で起動する場合は、上の`SPRING_DATASOURCE_URL`を
+```bash
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/validx
+```
+などに変更してください)
 > ⚠️ 本番環境では `.env` を絶対に公開しないでください。
 
 ---
 
-### 🏗️ ビルドと実行
+### 🐳 ビルドと実行(Docker)
+ローカルの環境にDockerアプリをインストールしてください
+```bash
+docker compose up -d
+```
+でビルドができます。  
+(初回起動時は5分くらい時間がかかります)
+
+### 🏗️ ビルドと実行(ローカル環境)
 
 #### 1. データベース初期化
 Flyway によりスキーマが自動でマイグレーションされます。
@@ -160,6 +172,28 @@ CI環境（GitHub Actionsなど）では自動で実行されます。
 ### (https://github.com/nagasawakenji/valid-X-front-dev-tool)  
 ### に記載してあります。
 
+### ユーザー登録方法
+#### 1. 認証メールリクエスト
+```bash
+curl -v -sk -X POST https://localhost:8443/v1/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "test_user_for_readme",
+    "display_name": "テストユーザー(レジュメ用)",
+    "email": "testforreadme@example.com",
+    "password": "testforreadme123",
+    "locale": "ja_JP",
+    "timezone": "Asia/Tokyo"
+  }'
+```
+このcurlコマンドを実行することにより認証メールが届きます。そのメールに記載されているリンクにアクセスすることで、ユーザー登録が完了します。  
+また、登録に失敗した際は、15分後にもう一度認証プロセスを実行してください。
+
+#### 2. マジックリンク認証
+1が成功すると、自動的に同じメールアドレスにマジックリンク認証のメールが届きます。  
+リンクにアクセスすることで、ACCESS_TOKENが付与され、下記のapiが実行できるようになります。
+___
+### ログイン方法
 #### 1. マジックリンク認証リクエスト
 ```bash
 curl -sk -c cookies.txt -b cookies.txt https://localhost:8443/v1/auth/magic-link/request \
