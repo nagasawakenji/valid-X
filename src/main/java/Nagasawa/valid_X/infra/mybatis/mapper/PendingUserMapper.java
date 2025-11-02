@@ -3,6 +3,8 @@ package Nagasawa.valid_X.infra.mybatis.mapper;
 import Nagasawa.valid_X.domain.model.PendingUser;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.time.Instant;
+
 @Mapper
 public interface PendingUserMapper {
 
@@ -10,7 +12,7 @@ public interface PendingUserMapper {
     PendingUser findPendingUserById(Long id);
 
     // emailで存在判定
-    boolean existsActiveByEmail(String email);
+    boolean existsActiveByEmail(String email, Instant now);
 
     // tokenHashで1件取得
     PendingUser findPendingUserByTokenHash(byte[] tokenHash);

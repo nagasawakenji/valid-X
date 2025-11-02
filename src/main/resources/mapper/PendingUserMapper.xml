@@ -67,10 +67,10 @@
         WHERE p.token_hash = #{tokenHash, jdbcType=BINARY, javaType=_byte[]}
     </select>
 
-    <select id="existsActiveByEmail" parameterType="string" resultType="boolean">
+    <select id="existsActiveByEmail" parameterType="map" resultType="boolean">
         SELECT EXISTS (
         SELECT 1 FROM pending_users
-        WHERE email = #{email} AND verified = FALSE
+        WHERE email = #{email} AND expires_at > #{now, jdbcType=TIMESTAMP} AND verified = FALSE
         )
     </select>
 
