@@ -81,7 +81,7 @@ public class SignupServiceTest {
         String urlToken = "token123";
         byte[] tokenHash = new byte[]{1, 2, 3};
 
-        when(pendingUserMapper.existsActiveByEmail("test@example.com")).thenReturn(false);
+        when(pendingUserMapper.existsActiveByEmail(eq("test@example.com"), any(Instant.class))).thenReturn(false);
         when(userMapper.existsByUsername("TestUser")).thenReturn(false);
         when(verificationService.generateVerificationUrlToken()).thenReturn(urlToken);
         when(verificationService.hashToken(urlToken)).thenReturn(tokenHash);
@@ -174,7 +174,7 @@ public class SignupServiceTest {
                 "UTC"
         );
 
-        when(pendingUserMapper.existsActiveByEmail("existing@example.com")).thenReturn(true);
+        when(pendingUserMapper.existsActiveByEmail(eq("existing@example.com"), any(Instant.class))).thenReturn(true);
 
         // 実行
         SignupResult result = signupService.signup(form);
@@ -203,7 +203,7 @@ public class SignupServiceTest {
                 "UTC"
         );
 
-        when(pendingUserMapper.existsActiveByEmail("newuser@example.com")).thenReturn(false);
+        when(pendingUserMapper.existsActiveByEmail(eq("newuser@example.com"), any(Instant.class))).thenReturn(false);
         when(userMapper.existsByUsername("existingUser")).thenReturn(true);
 
         // 実行

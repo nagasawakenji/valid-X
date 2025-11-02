@@ -2,6 +2,7 @@ package Nagasawa.valid_X.mybatis;
 
 import Nagasawa.valid_X.domain.model.PendingUser;
 import Nagasawa.valid_X.infra.mybatis.mapper.PendingUserMapper;
+import Nagasawa.valid_X.infra.mybatis.mapper.TestAdminMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,6 @@ public class PendingUserMapperTest {
     @BeforeEach
     void setup() {
         Instant testTime = Instant.parse("2025-10-13T12:00:00Z");
-        Instant now = Instant.parse("2025-10-13T12:00:01Z");
         tokenHash = new byte[]{1, 2, 3};
         pendingUser = PendingUser.builder()
                 .username("test_user")
@@ -71,7 +71,15 @@ public class PendingUserMapperTest {
     @Test
     @DisplayName("正常系: emailで存在判定ができる")
     void existsActiveByEmail_success() {
-        assertThat(pendingUserMapper.existsActiveByEmail("test@example.com")).isTrue();
+        Instant now = Instant.parse("2025-10-13T12:00:01Z");
+        assertThat(pendingUserMapper.existsActiveByEmail("test@example.com", now)).isTrue();
+    }
+
+    @Test
+    @DisplayName("正常系: 期限切れのpendingUserはexistsActiveByEmailに引っかからない")
+    void existActiveByEmail_notFound() {
+        Instant now = Instant.parse("2025-10-14T12:00:01Z");
+        assertThat(pendingUserMapper.existsActiveByEmail("test@example.com", now)).isFalse();
     }
 
     @Test
