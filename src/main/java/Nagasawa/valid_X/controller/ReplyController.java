@@ -11,6 +11,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,19 +23,21 @@ public class ReplyController {
 
     private final ReplyService replyService;
 
-    @PostMapping("/{tweetId}/reply")
+    @PostMapping(value = "/{tweetId}/reply", consumes = {"multipart/form-data"}) // consumesを指定
     public ResponseEntity<PostResult> reply(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable("tweetId") Long tweetId,
-            @RequestBody @Valid PostForm postForm
-            ) {
+            @RequestPart("postForm") @Valid PostForm postForm,
+            @RequestPart(value = "mediaFiles", required = false) List<MultipartFile> mediaFiles // ★ 追加
+    ) {
 
         if (tweetId == null || tweetId <= 0) {
             return ResponseEntity.badRequest().build();
         }
         Long userId = Long.valueOf(jwt.getSubject());
 
-        PostResult result = replyService.reply(tweetId, userId, postForm);
+        // ★ Serviceのシグネチャを変更し、mediaFilesを渡す
+        PostResult result = replyService.reply(tweetId, userId, postForm, mediaFiles);
 
         return ResponseEntity.ok(result);
     }

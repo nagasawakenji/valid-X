@@ -14,7 +14,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +33,8 @@ public class ReplyService {
     private final LocalMediaStorageService localMediaStorageService;
 
     @Transactional
-    public PostResult reply(Long parentTweetId, Long userId, PostForm postForm) {
+    // 修正: ファイルリスト (mediaFiles) を引数に追加
+    public PostResult reply(Long parentTweetId, Long userId, PostForm postForm, List<MultipartFile> mediaFiles) {
 
         if (!replyMapper.parentExists(parentTweetId)) {
             throw new IllegalArgumentException("parent tweet not found: id=" + parentTweetId);
@@ -53,36 +56,30 @@ public class ReplyService {
         // レスポンス用
         List<Media> medias = new ArrayList<>();
 
-        // メディア処理（PostService と同等のロジック）
-        if (postForm.medias() != null && !postForm.medias().isEmpty()) {
-            for (int i = 0; i < postForm.medias().size(); i++) {
-                var m = postForm.medias().get(i);
+        // mediaFilesから送られてきたMultiPartFileを処理
+        if (mediaFiles != null && !mediaFiles.isEmpty()) {
+            for (int i = 0; i < mediaFiles.size(); i++) {
+                MultipartFile mf = mediaFiles.get(i);
 
-                // dataUrl ガード
-                if (m.dataUrl() == null || m.dataUrl().isBlank()) {
-                    log.warn("media[{}]: dataUrl is null/blank. Skip.", i);
+                // mfが空出ないかのチェック
+                if (mf.isEmpty()) {
+                    log.warn("media[{}]: MultipartFile is empty. Skip.", i);
                     continue;
                 }
 
-                // bytes へ一度だけデコード
-                byte[] bytes;
-                try {
-                    bytes = decodeDataUrlBytes(m.dataUrl());
-                } catch (RuntimeException e) {
-                    log.warn("media[{}]: invalid dataUrl. Skip.", i, e);
-                    continue;
-                }
-                Long size = (long) bytes.length;
+                // mfのサイズを取得する
+                Long size = mf.getSize();
 
-                // MIME と拡張子
-                String mimeType = m.mimeType();          // 例: image/jpeg（null の可能性あり）
-                String ext = guessExt(mimeType);         // 例: .jpg
+                // MIME と拡張子を分離して扱う
+                String mimeType = mf.getContentType();       // ex: "image/jpeg" (null の可能性あり)
+                String ext = guessExt(mimeType);                // ex: ".jpg"
+                // targetFileName は LocalMediaStorageService.save() が内部でUUIDを使っているので不要だが、ログのために残す
                 String targetFileName = "tweet_" + tweetId + "_" + i + ext;
 
-                // 永続化（ローカルディスク）
+                // 4) 保存（最も効率的な save(MultipartFile) を使用）
                 String storageKey;
                 try {
-                    storageKey = localMediaStorageService.saveBytes(bytes, targetFileName);
+                    storageKey = localMediaStorageService.save(mf);
                 } catch (RuntimeException e) {
                     log.warn("media[{}]: persist failed. Skip linking.", i, e);
                     continue;
@@ -92,29 +89,28 @@ public class ReplyService {
                     continue;
                 }
 
-                // Media モデルを組み立て
+                // Media を作成 (メタデータは null のまま)
                 Media media = Media.builder()
                         .mediaType(inferMediaType(mimeType))
                         .mimeType(mimeType)
                         .bytes(size)
-                        .width(m.width())
-                        .height(m.height())
-                        .durationMs(m.durationMs())
+                        .width(null)
+                        .height(null)
+                        .durationMs(null)
                         .storageKey(storageKey)
                         .build();
 
-                // INSERT
+                // INSERT & リンク
                 postMapper.insertMedia(media);
 
-                // リンク（position は i）
-                TweetMedia link = TweetMedia.builder()
+                TweetMedia tweetMedia = TweetMedia.builder()
                         .tweetId(tweetId)
                         .mediaId(media.getMediaId())
                         .position(i)
                         .build();
-                postMapper.insertTweetMedia(link);
+                postMapper.insertTweetMedia(tweetMedia);
 
-                // レスポンス用に保持
+                // レスポンス用に詰める
                 medias.add(media);
             }
         }
@@ -126,7 +122,7 @@ public class ReplyService {
         return postResult;
     }
 
-    // 後で共通化する
+    // ... (guessExt, inferMediaType メソッドは変更なし) ...
 
     private String guessExt(String mime) {
         if (mime == null) return ".bin";
@@ -146,11 +142,5 @@ public class ReplyService {
         if ("image/gif".equals(mime)) return "gif";
         if (mime.startsWith("image/")) return "image";
         return "image";
-    }
-
-    private byte[] decodeDataUrlBytes(String dataUrl) {
-        int comma = dataUrl.indexOf(',');
-        String base64 = dataUrl.substring(comma + 1);
-        return java.util.Base64.getDecoder().decode(base64);
     }
 }
