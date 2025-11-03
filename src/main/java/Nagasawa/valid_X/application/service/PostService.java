@@ -1,7 +1,6 @@
 package Nagasawa.valid_X.application.service;
 
 import Nagasawa.valid_X.application.mapper.TweetConverter;
-import Nagasawa.valid_X.domain.dto.MediaCreate;
 import Nagasawa.valid_X.domain.dto.PostForm;
 import Nagasawa.valid_X.domain.dto.PostResult;
 import Nagasawa.valid_X.domain.model.Media;
@@ -14,11 +13,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.io.IOException;
 
 @Service
 @Slf4j
@@ -32,7 +30,7 @@ public class PostService {
     private final LocalMediaStorageService localMediaStorageService;
 
     @Transactional
-    public PostResult post(Long userId, PostForm postForm) {
+    public PostResult post(Long userId, PostForm postForm, List<MultipartFile> mediaFiles) {
 
         Tweet tweet = tweetConverter.toTweet(postForm, userId);
 
@@ -49,35 +47,28 @@ public class PostService {
 
 
 
-        if (postForm.medias() != null && !postForm.medias().isEmpty()) {
-            for (int i = 0; i < postForm.medias().size(); i++) {
-                MediaCreate m = postForm.medias().get(i);
+        if (mediaFiles != null && !mediaFiles.isEmpty()) {
+            for (int i = 0; i < mediaFiles.size(); i++) {
+                MultipartFile mf = mediaFiles.get(i);
 
-                // dataUrl のガード
-                if (m.dataUrl() == null || m.dataUrl().isBlank()) {
-                    log.warn("media[{}]: dataUrl is null/blank. Skip.", i);
+                // mfが空出ないかのチェック
+                if (mf.isEmpty()) {
+                    log.warn("media[{}]: MultipartFile is empty. Skip.", i);
                     continue;
                 }
 
-                // 一度だけデコードして bytes/size を得る
-                byte[] bytes;
-                try {
-                    bytes = decodeDataUrlBytes(m.dataUrl());
-                } catch (RuntimeException e) {
-                    log.warn("media[{}]: invalid dataUrl. Skip.", i, e);
-                    continue;
-                }
-                Long size = (long) bytes.length;
+                // mfのサイズを取得する
+                Long size = mf.getSize();
 
-                // 3) MIME と拡張子を分離して扱う
-                String mimeType = m.mimeType();                 // ex: "image/jpeg" (null の可能性あり)
+                // MIME と拡張子を分離して扱う
+                String mimeType = mf.getContentType();       // ex: "image/jpeg" (null の可能性あり)
                 String ext = guessExt(mimeType);                // ex: ".jpg"
                 String targetFileName = "tweet_" + tweetId + "_" + i + ext;
 
                 // 4) 保存（bytes を直接渡すので二重デコード無し）
                 String storageKey;
                 try {
-                    storageKey = localMediaStorageService.saveBytes(bytes, targetFileName);
+                    storageKey = localMediaStorageService.save(mf);
                 } catch (RuntimeException e) {
                     log.warn("media[{}]: persist failed. Skip linking.", i, e);
                     continue;
@@ -87,14 +78,16 @@ public class PostService {
                     continue;
                 }
 
-                // Media を作成（
+                // Media を作成 (現在、mediaのwidth,height, durationMsをフロント側から取得するように修正中です)
+                // (現状の動作に影響がないため、ひとまずwidth, height, durationMsを省略しています)
+                // 修正後にはpostFormにこれらの項目を追加します
                 Media media = Media.builder()
                         .mediaType(inferMediaType(mimeType))
                         .mimeType(mimeType)
                         .bytes(size)
-                        .width(m.width())
-                        .height(m.height())
-                        .durationMs(m.durationMs())
+                        .width(null)
+                        .height(null)
+                        .durationMs(null)
                         .storageKey(storageKey)
                         .build();
 
@@ -138,12 +131,6 @@ public class PostService {
         if ("image/gif".equals(mime)) return "gif";
         if (mime.startsWith("image/")) return "image";
         return "image";
-    }
-
-    private byte[] decodeDataUrlBytes(String dataUrl) {
-        int comma = dataUrl.indexOf(',');
-        String base64 = dataUrl.substring(comma + 1);
-        return java.util.Base64.getDecoder().decode(base64);
     }
 
 }
